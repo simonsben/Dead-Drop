@@ -4,17 +4,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class output {
-    public static void print_array(byte[] array) {
-        for (byte target : array) {
-            System.out.print((char) target);
+    public static void print_hex(byte[] array, int start, int end) {
+        int offset;
+
+        for(int index=start; index < end && index < array.length; index++) {
+            byte target = array[index];
+            System.out.printf("%02X ", target);
+
+            offset = start - index - 1;
+            if (offset % 16 == 0)
+                System.out.print('\n');
+            else if (offset % 4 == 0)
+                System.out.print("  ");
         }
+        System.out.print('\n');
     }
-    public static void print_array(byte[][] array) {
-        for (byte[] target : array) {
-            print_array(target);
-            System.out.print('\n');
-        }
-    }
+
 
     public static void write_file(Path file_path, byte[] data) {
         FileOutputStream data_file;

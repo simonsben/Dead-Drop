@@ -1,24 +1,13 @@
 # README
 
-Some ideas to use to get back into Java and write some interesting code
+Writing software to embed data in one or multiple images
 
-## Idea 1
+## Stages/features
 
-* Implement a data stream with run-length compression (?LZW?)
-* Encrypt it
-* Add checksums
-* Add delta encoding with split stream every N bytes in case of errors
-* Add some way to sync codebooks every L bytes
+* Open, read, and write files 
+* Read JPG headers
+* Add data to specific bytes in each block
 
-### Classes
+## Resources
 
-* streamer
-  * handles high-level class interaction
-* connection_handler
-  * handles 
-    * low level byte interaction
-    * checksum
-* compressor
-  * HashSet of values
-* encrypt_engine
-  * handles wrapping around encryption library
+* Used the classic [Lena test image](https://www.ece.rice.edu/~wakin/images/lenaTest1.jpg)
