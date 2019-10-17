@@ -1,6 +1,14 @@
 # JPG format notes
 
-## Structure
+## JPG Method
+
+* Convert image from RGB to YCC (red-green-brown to luma-blue_chroma-red_chroma)
+* Subsample chroma channels
+* Take DCT of 8x8 blocks using cosine transform
+* Quantize frequency blocks
+* Encode data using huffman
+
+## Metadata Structure
 
 * JPG images start with a header, `FF D8 FF`
 * Followed by metadata in either Exif or JFIF format
@@ -21,6 +29,11 @@ JFIF encoded metadata is in the following format:
 * 1 B - XThumbnail, horizontal pixel count
 * 1 B - YThumbnail, vertical pixel count
 
+## Image data structure
+
+* 
+
 ## References
 
 * [Header](https://www.file-recovery.com/jpg-signature-format.htm)
+* [JPG Method](https://www.imaging.org/site/IST/Resources/Imaging_Tutorials/What_s_Inside_a_JPEG_File/IST/Resources/Tutorials/Inside_JPEG.aspx?hkey=f9946f90-9f14-452d-897c-ac1612116e2d)
