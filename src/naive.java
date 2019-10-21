@@ -4,6 +4,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class naive {
     private BufferedImage image;
@@ -25,7 +26,6 @@ public class naive {
         for (int x=0;x<width;x++) {
             for (int y=0;y<height;y++) {
                 image_raster.getPixel(x, y, target);                                // Get pixel value
-                System.out.printf("%02X -> %02X\n", target[0], utilities.insert_bit(source, target[0], bit_index));
                 target[0] = utilities.insert_bit(source, target[0], bit_index);     // Insert hidden data
                 image_raster.setPixel(x, y, target);                                // Set pixel value
 
@@ -39,13 +39,47 @@ public class naive {
                     if (byte_index >= data.length)
                         last = true;
 
-                    source = (last ? '\n' : data[byte_index]);
+                    source = (last ? '\0' : data[byte_index]);
                 }
             }
         }
     }
 
-//    tmp[0] = target[0] & 0xFFFE;
+    public final byte[] recover_data() {
+        if (this.image == null)
+            return null;
+        int num_channels = this.image.getRaster().getNumBands();
+
+        Raster image_raster = this.image.getRaster();
+        int[] source = new int[num_channels];
+        int height = this.image.getHeight(), width = this.image.getWidth();
+        int bit_index = 0;
+        ArrayList<Byte> recovered = new ArrayList<Byte>();
+        int last = 0;
+
+        for (int x=0;x<width;x++) {
+            for (int y=0;y<height;y++) {
+                image_raster.getPixel(x, y, source);                                // Get pixel value
+                last = utilities.extract_bit(source[0], last, bit_index);     // Insert hidden data
+
+                bit_index++;
+                if (bit_index > 7) {
+                    if ((char) last != '\0') bit_index = 0;
+                    else {
+                        byte[] result = new byte[recovered.size()];
+                        for (int index=0;index<recovered.size();index++)
+                            result[index] = recovered.get(index);
+                        return result;
+                    }
+
+                    recovered.add((byte) last);
+                    last = 0;
+                }
+            }
+        }
+        return null;
+    }
+
 
 
     public final void embed_data(String embed_string) {
@@ -83,5 +117,4 @@ public class naive {
 
         return data;
     }
-
 }

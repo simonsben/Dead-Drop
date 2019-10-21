@@ -1,4 +1,6 @@
 public class utilities {
+    public static int base_bit = ~1;
+
     public static int get_mask(int index) {
         return 1 << index;
     }
@@ -8,8 +10,11 @@ public class utilities {
         return source & get_mask(index);
     }
 
-    // TODO Simplify boolean logic
     public static int insert_bit(int source, int target, int index) {
-        return (target & ~1) | get_bit(source, index);
+        return (target & base_bit) | get_bit(source, index) >> index;
+    }
+
+    public static int extract_bit(int source, int target, int index) {
+        return (get_bit(source, 0) << index) | target;
     }
 }
