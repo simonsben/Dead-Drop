@@ -1,3 +1,5 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,5 +43,17 @@ public class input {
     public static byte[] load_file(String filename) {
         Path file_path = Paths.get(filename);
         return load_file(file_path);
+    }
+
+    public static BufferedImage load_image(String filename) {
+        BufferedImage image;
+        try {
+            image = ImageIO.read(new File(filename));
+            System.out.println("Image loaded");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return image;
     }
 }

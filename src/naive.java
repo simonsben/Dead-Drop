@@ -1,9 +1,6 @@
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class naive {
@@ -28,7 +25,6 @@ public class naive {
                 image_raster.getPixel(x, y, target);                                // Get pixel value
                 target[0] = utilities.insert_bit(source, target[0], bit_index);     // Insert hidden data
                 image_raster.setPixel(x, y, target);                                // Set pixel value
-
 
                 bit_index++;
                 if (bit_index > 7) {
@@ -85,21 +81,11 @@ public class naive {
     }
 
     public final void load_image(String filename) {
-        try {
-            this.image = ImageIO.read(new File(filename));
-            System.out.println("Image loaded");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.image = input.load_image(filename);
     }
 
     public final void save_image(String filename, String file_type) {
-        try {
-            ImageIO.write(this.image, file_type, new File(filename));
-            System.out.println("Image saved.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        output.save_image(this.image, filename, file_type);
     }
 
     public final void save_image(String filename) {
@@ -107,19 +93,5 @@ public class naive {
         extension = extension == null ? "jpg" : extension;
 
         save_image(filename, extension);
-    }
-
-    // Make pretty
-    public final int[] get_bytes(int num_bytes) {
-        Raster source = this.image.getRaster();
-        int[] data = new int[num_bytes];
-        int[] tmp = new int[1];
-
-        for (int index=0;index<num_bytes;index++) {
-            source.getPixel(0, index, tmp);
-            data[index] = tmp[0];
-        }
-
-        return data;
     }
 }

@@ -1,3 +1,6 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,5 +36,14 @@ public class output {
     public static void write_file(String file_name, byte[] data) {
         Path file_path = Paths.get(file_name);
         write_file(file_path, data);
+    }
+
+    public static void save_image(BufferedImage image, String filename, String file_type) {
+        try {
+            ImageIO.write(image, file_type, new File(filename));
+            System.out.println("Image saved.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
