@@ -80,8 +80,6 @@ public class naive {
         return null;
     }
 
-
-
     public final void embed_data(String embed_string) {
         this.embed_data(embed_string.getBytes());
     }
@@ -95,13 +93,20 @@ public class naive {
         }
     }
 
-    public final void save_image(String filename) {
+    public final void save_image(String filename, String file_type) {
         try {
-            ImageIO.write(this.image, "jpg", new File(filename));
+            ImageIO.write(this.image, file_type, new File(filename));
             System.out.println("Image saved.");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public final void save_image(String filename) {
+        String extension = utilities.get_extension(filename);
+        extension = extension == null ? "jpg" : extension;
+
+        save_image(filename, extension);
     }
 
     // Make pretty
