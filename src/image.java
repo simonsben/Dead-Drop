@@ -1,22 +1,30 @@
+import java.awt.image.BufferedImage;
+
 public class image {
-    byte[] image_data;
+    public BufferedImage image;
+    public int num_channels;
 
-    image(String filename) {
-        this.load_file(filename);
+    public image(String filename) {
+        this.load_image(filename);
+        this.update_channels();
     }
 
-    void load_file(String filename) {
-        this.image_data = input.load_file("test_image.jpg");
-
-        if (!header.is_jfif(this.image_data)) {
-            this.image_data = null;
-            System.out.println("Provided filename is invalid.");
-        }
-
-        System.out.println("Loaded valid image.");
+    private void update_channels() {
+        this.num_channels = this.image.getRaster().getNumBands();
     }
 
-    public byte[] get_data() {
-        return this.image_data.clone();
+    public final void load_image(String filename) {
+        this.image = input.load_image(filename);
+    }
+
+    public final void save_image(String filename, String file_type) {
+        output.save_image(this.image, filename, file_type);
+    }
+
+    public final void save_image(String filename) {
+        String extension = utilities.get_extension(filename);
+        extension = extension == null ? "jpg" : extension;
+
+        save_image(filename, extension);
     }
 }
