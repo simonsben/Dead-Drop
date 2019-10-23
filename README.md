@@ -12,12 +12,12 @@ Writing software to embed data in one or multiple images
 
 * Encoding header
   * 1 byte for encoding type
-  * 2 bytes for number of bytes in data
+  * 4 bytes for number of bytes in data
   * 2 bytes for image index (if mode 1)
   * 4 byte encoding ID (if mode 1)
   * X byte filename list (if mode 2)
 * Encoding type
-  * 0 single-file
+  * 0 single-file (default)
   * 1 multi-file indexed
   * 2 multi-file header-defined
 

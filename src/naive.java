@@ -46,7 +46,7 @@ public class naive {
         embed_data(image, embed_string.getBytes(), offset);
     }
 
-    public void embed_data(BufferedImage image, byte[] data) {
+    public static void embed_data(BufferedImage image, byte[] data) {
         embed_data(image, data, 0);
     }
 
