@@ -1,7 +1,5 @@
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.util.ArrayList;
 
 public class naive {
     // TODO add support for multi-channel encoding
@@ -13,30 +11,29 @@ public class naive {
         int byte_index = 0, bit_index = 0, source = data[0];
 
         int[] target_image = new int[num_channels];
-        boolean last = false, initial_load = true;
+        boolean initial_load = true;
 
         for (int x=0;x<width;x++) {
             for (int y=0;y<height;y++) {
                 if (initial_load) {
-                    x = offset / width;
-                    y = offset % width;
+                    x = (offset * 8) / width;
+                    y = (offset * 8) % width;
                     initial_load = false;
                 }
 
-                image_raster.getPixel(x, y, target_image);                                // Get pixel value
+                image_raster.getPixel(x, y, target_image);                                      // Get pixel value
                 target_image[0] = utilities.insert_bit(source, target_image[0], bit_index);     // Insert hidden data
-                image_raster.setPixel(x, y, target_image);                                // Set pixel value
+                image_raster.setPixel(x, y, target_image);                                      // Set pixel value
 
                 bit_index++;
                 if (bit_index > 7) {
-                    if (!last) bit_index = 0;
-                    else return;
+                    bit_index = 0;  // Reset bit index
 
-                    byte_index++;
-                    if (byte_index >= data.length)
-                        last = true;
+                    byte_index++;   // Increment byte index
+                    if (byte_index >= data.length)  // If no more data, stop
+                        return;
 
-                    source = (last ? '\0' : data[byte_index]);
+                    source = data[byte_index];      // Get next byte to embed
                 }
             }
         }
@@ -50,35 +47,38 @@ public class naive {
         embed_data(image, data, 0);
     }
 
-    public static byte[] recover_data(BufferedImage image) {
-        if (image == null)
-            return null;
-        int num_channels = image.getRaster().getNumBands();
+    public static byte[] recover_data(BufferedImage image, int data_size, int offset) {
+        WritableRaster image_raster = image.getRaster();            // Get image raster
+        byte[] data = new byte[data_size];
 
-        Raster image_raster = image.getRaster();
-        int[] source = new int[num_channels];
-        int height = image.getHeight(), width = image.getWidth();
-        int bit_index = 0;
-        ArrayList<Byte> recovered = new ArrayList<Byte>();
-        int last = 0;
+        int num_channels = image_raster.getNumBands();              // Get number of channels in image
+        int height = image.getHeight(), width = image.getWidth();   // Get height and width of image
+        int byte_index = 0, bit_index = 0, current_byte = 0;        // Allocate indexes
 
-        for (int x=0;x<width;x++) {
-            for (int y=0;y<height;y++) {
-                image_raster.getPixel(x, y, source);                                // Get pixel value
-                last = utilities.extract_bit(source[0], last, bit_index);     // Insert hidden data
+        int[] target_pixel = new int[num_channels];                 // Allocate byte array to extract image data
+        boolean initial_load = true;                                // Set initial loop to true
 
-                bit_index++;
-                if (bit_index > 7) {
-                    if ((char) last != '\0') bit_index = 0;
-                    else {
-                        byte[] result = new byte[recovered.size()];
-                        for (int index=0;index<recovered.size();index++)
-                            result[index] = recovered.get(index);
-                        return result;
-                    }
+        for (int x=0;x<width;x++) {         // For each row
+            for (int y=0;y<height;y++) {    // For each column
+                if (initial_load) {         // Set offset before starting
+                    x = (offset * 8) / width;
+                    y = (offset * 8) % width;
+                    initial_load = false;
+                }
 
-                    recovered.add((byte) last);
-                    last = 0;
+                image_raster.getPixel(x, y, target_pixel);                                          // Get pixel value
+                current_byte = utilities.extract_bit(target_pixel[0], current_byte, bit_index);     // Get pixel
+
+                bit_index++;    // Increment bit index
+                if (bit_index > 7) {    // If end of byte
+                    bit_index = 0;      // Reset bit index
+
+                    data[byte_index] = (byte) current_byte;    // Add current byte to extracted data array
+                    current_byte = 0;                           // Reset current byte value
+
+                    byte_index++;                   // Increment byte index
+                    if (byte_index >= data.length)  // If no more data, stop
+                        return data;
                 }
             }
         }

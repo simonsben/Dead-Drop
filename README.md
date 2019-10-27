@@ -5,8 +5,9 @@ Writing software to embed data in one or multiple images
 ## Stages/features
 
 * Open, read, and write files 
-* Read JPG headers
 * Add data to specific bytes in each block
+* Add checkums
+* Add original filename
 
 ## Format
 

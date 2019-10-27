@@ -1,6 +1,7 @@
 public abstract class image_encoder {
     image[] image_set;
     int data_length;
+    int header_length;
 
     public image_encoder(image[] image_set) {
         this.image_set = image_set;

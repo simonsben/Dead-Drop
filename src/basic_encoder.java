@@ -3,6 +3,7 @@ import java.nio.ByteBuffer;
 public class basic_encoder extends image_encoder {
     public basic_encoder(String[] filenames) {
         super(filenames);
+        this.header_length = 5;
     }
 
     public byte[] get_header(int data_length) {
@@ -27,14 +28,18 @@ public class basic_encoder extends image_encoder {
         if (header == null)
             return;
 
-        naive.embed_data(this.image_set[0].image, header);                  // Embed encoding header
+        naive.embed_data(this.image_set[0].image, header, 0);                  // Embed encoding header
         naive.embed_data(this.image_set[0].image, data, header.length);
     }
 
-    public void extract_data() {
-        byte[] data = new byte[this.data_length];
+    public byte[] extract_data() {
+        byte[] header = naive.recover_data(this.image_set[0].image, this.header_length, 0);
+        decode_header(header);
 
-        // TODO modify naive to work
+        System.out.printf("Recovering %d bytes\n", this.data_length);
+
+        byte[] recovered_data = naive.recover_data(this.image_set[0].image, this.data_length, this.header_length);
+        return recovered_data;
     }
 
 //    Code to embed multiple images, king of
