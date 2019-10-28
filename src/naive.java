@@ -13,8 +13,8 @@ public class naive {
         int[] target_image = new int[num_channels];
         boolean initial_load = true;
 
-        for (int x=0;x<width;x++) {
-            for (int y=0;y<height;y++) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 if (initial_load) {
                     x = (offset * 8) / width;
                     y = (offset * 8) % width;
@@ -39,10 +39,6 @@ public class naive {
         }
     }
 
-    public static void embed_data(BufferedImage image, String embed_string, int offset) {
-        embed_data(image, embed_string.getBytes(), offset);
-    }
-
     public static void embed_data(BufferedImage image, byte[] data) {
         embed_data(image, data, 0);
     }
@@ -58,8 +54,8 @@ public class naive {
         int[] target_pixel = new int[num_channels];                 // Allocate byte array to extract image data
         boolean initial_load = true;                                // Set initial loop to true
 
-        for (int x=0;x<width;x++) {         // For each row
-            for (int y=0;y<height;y++) {    // For each column
+        for (int x = 0; x < width; x++) {         // For each row
+            for (int y = 0; y < height; y++) {    // For each column
                 if (initial_load) {         // Set offset before starting
                     x = (offset * 8) / width;
                     y = (offset * 8) % width;
@@ -83,5 +79,9 @@ public class naive {
             }
         }
         return null;
+    }
+
+    public static byte[] recover_data(BufferedImage image, int data_size) {
+        return recover_data(image, data_size, 0);
     }
 }

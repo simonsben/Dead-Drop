@@ -28,18 +28,15 @@ public class basic_encoder extends image_encoder {
         if (header == null)
             return;
 
-        naive.embed_data(this.image_set[0].image, header, 0);                  // Embed encoding header
-        naive.embed_data(this.image_set[0].image, data, header.length);
+        naive.embed_data(this.image_set[0].image, header);                  // Embed header
+        naive.embed_data(this.image_set[0].image, data, header.length);     // Embed data
     }
 
     public byte[] extract_data() {
-        byte[] header = naive.recover_data(this.image_set[0].image, this.header_length, 0);
-        decode_header(header);
+        byte[] header = naive.recover_data(this.image_set[0].image, this.header_length);    // Recover header
+        decode_header(header);                                                              // Read header
 
-        System.out.printf("Recovering %d bytes\n", this.data_length);
-
-        byte[] recovered_data = naive.recover_data(this.image_set[0].image, this.data_length, this.header_length);
-        return recovered_data;
+        return naive.recover_data(this.image_set[0].image, this.data_length, this.header_length);   // Recover data
     }
 
 //    Code to embed multiple images, king of

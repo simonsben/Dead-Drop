@@ -20,7 +20,7 @@ public class image {
 
     public void save_image(String filename) {
         String extension = utilities.get_extension(filename);
-        extension = extension == null ? "jpg" : extension;
+        extension = extension == null ? "png" : extension;
 
         save_image(filename, extension);
     }
