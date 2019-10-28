@@ -2,7 +2,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
 public class naive {
-    // TODO add support for multi-channel encoding
     public static void embed_data(BufferedImage image, byte[] data, int offset) {
         WritableRaster image_raster = image.getRaster();
 

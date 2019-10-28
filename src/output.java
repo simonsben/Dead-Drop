@@ -41,7 +41,7 @@ public class output {
     public static void save_image(BufferedImage image, String filename, String file_type) {
         try {
             ImageIO.write(image, file_type, new File(filename));
-            System.out.println("Image saved.");
+            System.out.println(filename + " saved.");
         } catch (IOException e) {
             e.printStackTrace();
         }

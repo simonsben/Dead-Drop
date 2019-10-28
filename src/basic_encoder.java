@@ -21,7 +21,6 @@ public class basic_encoder extends image_encoder {
         System.arraycopy(header, 1, tmp, 0, 4);
 
         this.data_length = ByteBuffer.wrap(tmp).getInt();
-        System.out.printf("data length - %d\n", this.data_length);
     }
 
     public void encode_data(byte[] data) {
