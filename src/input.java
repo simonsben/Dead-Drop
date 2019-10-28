@@ -56,4 +56,8 @@ public class input {
         }
         return image;
     }
+
+    public static BufferedImage load_image(Path file_path) {
+        return load_image(file_path.toString());
+    }
 }

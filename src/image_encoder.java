@@ -2,6 +2,7 @@ public abstract class image_encoder {
     image[] image_set;
     int data_length;
     int header_length;
+    int data_capacity;
 
     public image_encoder(image[] image_set) {
         this.image_set = image_set;
@@ -21,6 +22,7 @@ public abstract class image_encoder {
         for (image img : this.image_set)
             capacity += img.total_capacity;
 
+        this.data_capacity = capacity;
         return capacity;
     }
 
@@ -33,6 +35,11 @@ public abstract class image_encoder {
         }
 
         return header;
+    }
+
+    public void save_images() {
+        for (image target_image : this.image_set)
+            target_image.save_image();
     }
 
     public abstract byte[] get_header(int data_length);
