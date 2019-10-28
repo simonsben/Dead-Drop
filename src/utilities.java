@@ -1,3 +1,5 @@
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,5 +49,20 @@ public class utilities {
             return null;
 
         return matcher.group(0);
+    }
+
+    public static byte[] concat_arrays(byte[] a, byte[] b) {
+        int new_length = a.length + b.length;
+        byte[] combined = new byte[new_length];
+
+        System.arraycopy(a, 0, combined, 0, a.length);
+        System.arraycopy(b, 0, combined, a.length, b.length);
+
+        return combined;
+    }
+
+    public static void split_array(byte[] combined, byte[] a, byte[] b) {
+        System.arraycopy(combined, 0, a, 0, a.length);
+        System.arraycopy(combined, a.length, b, 0, b.length);
     }
 }

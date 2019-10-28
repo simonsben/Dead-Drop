@@ -10,6 +10,17 @@ The approach being:
 * Get target data (to be hidden)
 * Move through image and embed the *hidden* data into the least significant bit of each byte in the file
 
-## More thought through method
+## BPCS stenography
 
-* Embed information in high-frequency components of images since the human eye has a hard time noticing detail there
+BPCS works on the principle that the human eye has a hard time seeing *detail* within noise.
+To exploit this, BPCS takes an image and breaks it into blocks (just like JPG does).
+It them takes the blocks and splits it into bit-planes.
+For any given plane in a block, it is considered *high-frequency* if its alpha value (see subsection below) is greater 
+than the pre-determined threshold.
+BPCS then replaces the (high-frequency) bit-planes with the payload data.
+
+## Noise metric alpha
+
+The noise of an image (or subsection of an image) is given as a metric denoted alpha.
+Alpha is given by `a = k / (2 * 2 ** m * (2 ** m - 1))`, for an image of (2 ** m x 2 ** m).
+So, for the standard break-up mode (generating 8x8 blocks), m = 3.
