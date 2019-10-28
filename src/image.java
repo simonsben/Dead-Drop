@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 public class image {
     public BufferedImage image;
     public int total_capacity;
+    int num_channels;
     Path filename;
 
     public image(String filename) {
@@ -15,6 +16,7 @@ public class image {
 
     public void load_image() {
         this.image = input.load_image(this.filename);
+        this.num_channels = this.image.getRaster().getNumBands();
         this.update_capacity();
     }
 
@@ -36,6 +38,6 @@ public class image {
 
     public void update_capacity() {
         Raster raster = this.image.getRaster();
-        this.total_capacity = raster.getWidth() * raster.getHeight() / 8;
+        this.total_capacity = raster.getWidth() * raster.getHeight() * this.num_channels / 8;
     }
 }

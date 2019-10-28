@@ -21,6 +21,7 @@ public class basic_encoder extends image_encoder {
         System.arraycopy(header, 1, tmp, 0, 4);
 
         this.data_length = ByteBuffer.wrap(tmp).getInt();
+        System.out.printf("data length - %d\n", this.data_length);
     }
 
     public void encode_data(byte[] data) {
@@ -29,7 +30,7 @@ public class basic_encoder extends image_encoder {
             return;
 
         naive.embed_data(this.image_set[0].image, header);                  // Embed header
-        naive.embed_data(this.image_set[0].image, data, header.length);     // Embed data
+        naive.embed_data(this.image_set[0].image, data, this.header_length);     // Embed data
     }
 
     public byte[] extract_data() {
