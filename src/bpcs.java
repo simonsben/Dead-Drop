@@ -11,8 +11,9 @@ public class bpcs {
         if (channel >= num_channels)
             return null;
 
+        image.getPixels(0, 0, width, 1, secondary_row);
         for (int y=0;y<height-1;y++) {
-            image.getPixels(0, y, width, 1, primary_row);
+            image.getPixels(0, y + 1, width, 1, primary_row);
             tmp = secondary_row;
             secondary_row = primary_row;
             primary_row = tmp;
@@ -39,7 +40,7 @@ public class bpcs {
                 difference = primary_row[x_index] ^ secondary_row[x_index];
                 utilities.offload_differences(edge_counts, x_block, y_block, difference);
 
-                if (x + 1 == width) {
+                if (y + 1 == height) {
                     difference = primary_row[x_index + num_channels] ^ secondary_row[x_index + num_channels];
                     utilities.offload_differences(edge_counts, (x + 1) / block_size, y_block, difference);
                 }
