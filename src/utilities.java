@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 public class utilities {
     public static int base_bit = ~1;
+    public static int byte_mask = 0xFF;
 
     // Generates mask to isolate the bit at the given index
     public static int get_mask(int index) {
@@ -32,10 +33,12 @@ public class utilities {
         return execute_regex("(?<=\\.)\\w+", filename);
     }
 
+    // Removes extension from filename (ex. file.txt -> file)
     public static String remove_extension(String filename) {
         return execute_regex("^[\\w\\d-]+(?=\\.)", filename);
     }
 
+    // Executes a regex function
     public static String execute_regex(String regex_string, String target) {
         Pattern pattern = Pattern.compile(regex_string);
         Matcher matcher = pattern.matcher(target);
@@ -43,6 +46,7 @@ public class utilities {
         return execute_regex(matcher);
     }
 
+    // Executes regex function
     public static String execute_regex(Matcher matcher) {
         boolean did_find = matcher.find();
         if (!did_find)
@@ -51,6 +55,7 @@ public class utilities {
         return matcher.group(0);
     }
 
+    // Concatenate byte arrays
     public static byte[] concat_arrays(byte[] a, byte[] b) {
         int new_length = a.length + b.length;
         byte[] combined = new byte[new_length];
@@ -61,8 +66,14 @@ public class utilities {
         return combined;
     }
 
+    // Split byte arrays
     public static void split_array(byte[] combined, byte[] a, byte[] b) {
         System.arraycopy(combined, 0, a, 0, a.length);
         System.arraycopy(combined, a.length, b, 0, b.length);
+    }
+
+    public static void offload_differences(byte[][][] counts, int x, int y, int difference) {
+        for (int bit=0;bit<8;bit++)
+            counts[bit][x][y] += get_bit(difference, bit) > 0? 1 : 0;
     }
 }
