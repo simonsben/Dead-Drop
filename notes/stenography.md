@@ -23,4 +23,4 @@ BPCS then replaces the (high-frequency) bit-planes with the payload data.
 
 The noise of an image (or subsection of an image) is given as a metric denoted alpha.
 Alpha is given by `a = k / (2 * 2 ** m * (2 ** m - 1))`, for an image of (2 ** m x 2 ** m).
-So, for the standard break-up mode (generating 8x8 blocks), m = 3.
+So, for the standard block size (8x8), m = 3.
