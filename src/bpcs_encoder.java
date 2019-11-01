@@ -23,14 +23,28 @@ public class bpcs_encoder extends basic_encoder {
         for (int channel=0;channel<num_channels;channel++) {
             edge_counts = bpcs.count_edges(base_raster, channel, this.block_size);
 
-            if (channel == 0) {
-                // TODO generalize so it can accept longer headers than just one row of blocks
-                for (int block=0;block<used_blocks;block++)
-                    edge_counts[0][block][0] = 0;
+            if (channel == 0)
+                reserve_header_blocks(edge_counts);
+
+            // TODO available blocks then pass N * block_size byte of data
+
+
+        }
+    }
+
+    void reserve_header_blocks(byte[][][] edge_counts) {
+        int blocks_required = (int) Math.ceil(this.header_length / this.block_size);
+        int blocks_reserved = 0;
+
+        for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
+            for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
+                for (int bit=0;bit<edge_counts.length;bit++) {
+                    edge_counts[bit][x_index][y_index] = 0;
+
+                    if (++blocks_reserved >= blocks_required)
+                        return;
+                }
             }
-
-
-
         }
     }
 }

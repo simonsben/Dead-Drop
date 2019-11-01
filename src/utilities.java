@@ -23,9 +23,20 @@ public class utilities {
         return (target & base_bit) | get_bit(source, index) >> index;
     }
 
+    public static int place_bit(int source, int target, int source_index, int target_index) {
+        int source_bit = get_bit(source, source_index), offset = target_index - source_index;
+        source_bit = (offset < 0)? source_bit >> -offset : source_bit << offset;
+
+        return (target & ~get_mask(target_index)) | source_bit;
+    }
+
     // Extracts the bit from the LSB of the source and inserts into the given index of the target
     public static int extract_bit(int source, int target, int index) {
-        return (get_bit(source, 0) << index) | target;
+        return extract_bit(source, target, 0, index);
+    }
+
+    public static int extract_bit(int source, int target, int source_index, int target_index) {
+        return (get_bit(source, source_index) << target_index) | target;
     }
 
     // Gets the file type extension (ex. file.txt -> txt)

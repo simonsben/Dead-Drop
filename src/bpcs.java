@@ -60,26 +60,54 @@ public class bpcs {
     }
 
     public static void embed_data(BufferedImage image, byte[][][] edge_counts, byte[] data, int block_size, int channel) {
-        WritableRaster image_raster = image.getRaster();
         BufferedImage sub_image;
-        int data_offset = 0, data_left = data.length, block_capacity = block_size * block_size;
+        int data_offset = 0, block_capacity = block_size * block_size;
         byte[] data_subset = new byte[block_capacity];
 
-        for (int bit=0;bit<8;bit++) {
-            for (int x_index=0;x_index<edge_counts[0].length;x_index++){
-                for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
-                    if (edge_counts[bit][x_index][y_index] < threshold>)
+        for (int x_index=0;x_index<edge_counts[0].length;x_index++){
+            for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
+                sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
+
+                for (int bit=0;bit<8;bit++) {
+                    if (edge_counts[bit][x_index][y_index] < threshold)
                         continue;
 
-                    sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
                     System.arraycopy(data, data_offset, data_subset, 0, Math.min(block_capacity, block_capacity - data_offset));
-
                     data_offset += block_capacity;
 
-                    embed_block(sub_image.getRaster(), data_subset, block_size, channel);
+                    embed_block(sub_image.getRaster(), data_subset, block_size, channel, bit);
+                    if (data_offset >= data.length)
+                        return;
                 }
             }
         }
+    }
+
+    public static byte[] recover_data(BufferedImage image, byte[][][] edge_counts, int data_length, int block_size, int channel) {
+        BufferedImage sub_image;
+        byte[] data = new byte[data_length];
+        int data_offset = 0, block_capacity = block_size * block_size;
+        byte[] data_subset = new byte[block_capacity];
+
+        for (int x_index=0;x_index<edge_counts[0].length;x_index++){
+            for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
+                sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
+
+                for (int bit=0;bit<8;bit++) {
+                    if (edge_counts[bit][x_index][y_index] < threshold)
+                        continue;
+
+                    recover_block(sub_image.getRaster(), data_subset, block_size, channel, bit);
+                    System.arraycopy(data_subset, 0, data, data_offset, Math.min(block_capacity, block_capacity - data_offset));
+                    data_offset += block_capacity;
+
+                    if (data_offset >= data_length)
+                        return data;
+                }
+            }
+        }
+
+        return data;
     }
 
     public static void embed_block(WritableRaster image, byte[] data, int block_size, int channel, int bit) {
@@ -89,20 +117,42 @@ public class bpcs {
         for (int x=0;x<block_size;x++) {
             for (int y=0;y<block_size;y++) {
                 image.getPixel(x, y, image_data);
-
-                image_data[channel] = utilities.insert_bit(source, image_data[channel], bit_index);
+                image_data[channel] = utilities.place_bit(source, image_data[channel], bit_index, bit);
+                image.setPixel(x, y, image_data);
 
                 bit_index++;
                 if (bit_index > 7) {
                     bit_index = 0;  // Reset bit index
 
                     byte_index++;                       // Increment byte index
-                    if (byte_index >= data.length) {    // If no more data, stop
-                        image.setPixel(x, y, image_data);      // Set pixel value before stopping
+                    if (byte_index >= data.length)      // If no more data, stop
                         return;
-                    }
-
                     source = data[byte_index];      // Get next byte to embed
+                }
+            }
+        }
+    }
+
+    public static void recover_block(Raster image, byte[] data, int block_size, int channel, int bit) {
+        int bit_index = 0, byte_index = 0, current_byte = 0;
+        int[] image_data = new int[image.getNumBands()];
+
+        for (int x=0;x<block_size;x++) {
+            for (int y=0;y<block_size;y++) {
+                image.getPixel(x, y, image_data);
+
+                current_byte = utilities.extract_bit(image_data[channel], current_byte, bit, bit_index);
+
+                bit_index++;
+                if (bit_index > 7) {
+                    bit_index = 0;  // Reset bit index
+                    data[byte_index] = (byte) current_byte;
+
+                    byte_index++;                       // Increment byte index
+                    if (byte_index >= data.length)      // If no more space for data, stop
+                        return;
+
+                    current_byte = 0;
                 }
             }
         }
