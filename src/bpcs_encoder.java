@@ -48,28 +48,28 @@ public class bpcs_encoder extends basic_encoder {
 //        }
 //    }
 
-    void recover_header(byte[][][] edge_counts, BufferedImage image) {
-        byte[] header = new byte[header_length], info_block;
-        int data_offset = 0, info_size, block_capacity = block_size * block_size;
-        BufferedImage sub_image;
-
-        for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
-            for (int y_index = 0; y_index < edge_counts[0][0].length; y_index++) {
-                info_size = Math.min(block_capacity, header.length - data_offset);
-                info_block = new byte[info_size];
-
-                sub_image = image.getSubimage(x_index * block_size, x_index * block_size, block_size, block_size);
-                bpcs.recover_block(sub_image.getRaster(), info_block, block_size, 0, 0);
-                System.arraycopy(info_block, 0, header, data_offset, info_block.length);
-
-                data_offset += info_size;
-                if (data_offset >= header_length) {
-                    this.decode_header(header);
-                    return;
-                }
-            }
-        }
-    }
+//    void recover_header(byte[][][] edge_counts, BufferedImage image) {
+//        byte[] header = new byte[header_length], info_block;
+//        int data_offset = 0, info_size, block_capacity = block_size * block_size;
+//        BufferedImage sub_image;
+//
+//        for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
+//            for (int y_index = 0; y_index < edge_counts[0][0].length; y_index++) {
+//                info_size = Math.min(block_capacity, header.length - data_offset);
+//                info_block = new byte[info_size];
+//
+//                sub_image = image.getSubimage(x_index * block_size, x_index * block_size, block_size, block_size);
+//                bpcs.recover_block(sub_image.getRaster(), info_block, block_size, 0, 0);
+//                System.arraycopy(info_block, 0, header, data_offset, info_block.length);
+//
+//                data_offset += info_size;
+//                if (data_offset >= header_length) {
+//                    this.decode_header(header);
+//                    return;
+//                }
+//            }
+//        }
+//    }
 
 
 

@@ -1,5 +1,7 @@
 package utilities;
 
+import java.nio.ByteBuffer;
+
 public class data_management {
     // Concatenate byte arrays
     public static byte[] concat_arrays(byte[] a, byte[] b) {
@@ -21,5 +23,17 @@ public class data_management {
     public static void offload_differences(byte[][][] counts, int x, int y, int difference) {
         for (int bit=0;bit<8;bit++)
             counts[bit][x][y] += low_level.get_bit(difference, bit) > 0? 1 : 0;
+    }
+
+    public static byte[] get_array(short value) {
+        return ByteBuffer.allocate(2).putShort(value).array();
+    }
+
+    public static byte[] get_array(int value) {
+        return ByteBuffer.allocate(4).putInt(value).array();
+    }
+
+    public static byte[] get_array(long value) {
+        return ByteBuffer.allocate(8).putLong(value).array();
     }
 }

@@ -1,58 +1,40 @@
+import core.header;
+import core.image;
 import core.naive;
-import java.nio.ByteBuffer;
+
+import java.awt.image.Raster;
 
 public class basic_encoder extends image_encoder {
+    image base_image;
+
     public basic_encoder(String[] filenames) {
         super(filenames);
         this.header_length = 5;
+        base_image = this.image_set[0];
+    }
+
+    public void analyze_image(image img) {
+        Raster raster = img.image.getRaster();
+        img.data_capacity = raster.getWidth() * raster.getHeight() * img.num_channels / 8;
     }
 
     public byte[] get_header(int data_length) {
-        byte[] header;
-        header = new byte[5];
+        if (base_image.data_capacity < data_length)
+            return null;
 
-        byte[] tmp = ByteBuffer.allocate(4).putInt(data_length).array();
-        System.arraycopy(tmp, 0, header, 1, 4);
-
-        return header;
-    }
-
-    public void decode_header(byte[] header) {
-        byte[] tmp = new byte[4];
-        System.arraycopy(header, 1, tmp, 0, 4);
-
-        this.data_length = ByteBuffer.wrap(tmp).getInt();
+        base_image.encode_mode = 1;
+        base_image.data_size = data_length;
+        return header.generate_mode_one(base_image);
     }
 
     public void encode_data(byte[] data) {
-        byte[] header = this.has_capacity(data.length);     // Get encoding data header
-        if (header == null)
-            return;
+        has_capacity(data.length);
 
-        naive.embed_data(this.image_set[0].image, header);                  // Embed header
+        naive.embed_data(this.image_set[0].image, get_header(data.length));      // Embed header
         naive.embed_data(this.image_set[0].image, data, this.header_length);     // Embed data
     }
 
-    public byte[] extract_data() {
-        byte[] header = naive.recover_data(this.image_set[0].image, this.header_length);    // Recover header
-        decode_header(header);                                                              // Read header
-
-        return naive.recover_data(this.image_set[0].image, this.data_length, this.header_length);   // Recover data
+    public byte[] decode_data() {
+        return naive.recover_data(base_image.image, base_image.data_size, this.header_length);   // Recover data
     }
-
-//    Code to embed multiple images, king of
-//    int image_offset = header.length, data_offset = 0, slice_length;    // Define constants
-//    core.image current_image;
-//        for (int index=0;index<this.image_set.length;index++) {             // Add data to images
-//            current_image = this.image_set[index];
-//            slice_length = Math.min(current_image.total_capacity - image_offset, data.length - data_offset);
-//
-//            byte[] data_slice = Arrays.copyOfRange(data, data_offset, data_offset + slice_length);
-//            core.naive.embed_data(current_image.core.image, data_slice, image_offset);
-//
-//            image_offset = 0;
-//            data_offset += slice_length;
-//            if (data_offset >= data.length)
-//                break;
-//        }
 }

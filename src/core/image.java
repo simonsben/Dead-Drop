@@ -4,14 +4,14 @@ import utilities.input;
 import utilities.output;
 import utilities.strings;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class image {
     public BufferedImage image;
-    public int total_capacity;
-    int num_channels;
+    public int data_capacity, num_channels, data_size, encoding_id;
+    short image_index;
+    public byte encode_mode = -1;
     Path filename;
 
     public image(String filename) {
@@ -22,7 +22,7 @@ public class image {
     public void load_image() {
         this.image = input.load_image(this.filename);
         this.num_channels = this.image.getRaster().getNumBands();
-        this.update_capacity();
+        header.decode_header(this);
     }
 
     public void save_image(String filename, String file_type) {
@@ -39,14 +39,5 @@ public class image {
         extension = extension == null ? "png" : extension;
 
         save_image(filename, extension);
-    }
-
-    public void update_capacity() {
-        Raster raster = this.image.getRaster();
-        this.total_capacity = raster.getWidth() * raster.getHeight() * this.num_channels / 8;
-    }
-
-    public void update_capacity(int capacity) {
-        this.total_capacity = capacity;
     }
 }
