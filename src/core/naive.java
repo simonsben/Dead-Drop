@@ -1,3 +1,6 @@
+package core;
+
+import utilities.low_level;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
@@ -27,7 +30,7 @@ public class naive {
                         initial_load = false;
                     }
 
-                    target_image[channel] = utilities.insert_bit(source, target_image[channel], bit_index);
+                    target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index);
 
                     bit_index++;
                     if (bit_index > 7) {
@@ -52,14 +55,14 @@ public class naive {
     }
 
     public static byte[] recover_data(BufferedImage image, int data_size, int offset) {
-        WritableRaster image_raster = image.getRaster();            // Get image raster
+        WritableRaster image_raster = image.getRaster();            // Get core.image raster
         byte[] data = new byte[data_size];
 
-        int num_channels = image_raster.getNumBands();              // Get number of channels in image
-        int height = image.getHeight(), width = image.getWidth();   // Get height and width of image
+        int num_channels = image_raster.getNumBands();              // Get number of channels in core.image
+        int height = image.getHeight(), width = image.getWidth();   // Get height and width of core.image
         int byte_index = 0, bit_index = 0, current_byte = 0;        // Allocate indexes
 
-        int[] target_pixel = new int[num_channels];                 // Allocate byte array to extract image data
+        int[] target_pixel = new int[num_channels];                 // Allocate byte array to extract core.image data
         boolean initial_load = true;                                // Set initial loop to true
 
         for (int x = 0; x < width; x++) {         // For each row
@@ -78,7 +81,7 @@ public class naive {
                         initial_load = false;
                     }
 
-                    current_byte = utilities.extract_bit(target_pixel[channel], current_byte, bit_index);     // Get pixel
+                    current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_index);     // Get pixel
 
                     bit_index++;    // Increment bit index
                     if (bit_index > 7) {    // If end of byte

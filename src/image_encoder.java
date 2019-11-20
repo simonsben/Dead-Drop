@@ -1,3 +1,5 @@
+import core.image;
+
 public abstract class image_encoder {
     image[] image_set;
     int data_length;

@@ -2,7 +2,7 @@
 
 ## JPG Method
 
-* Convert image from RGB to YCC (red-green-brown to luma-blue_chroma-red_chroma)
+* Convert core.image from RGB to YCC (red-green-brown to luma-blue_chroma-red_chroma)
 * Subsample chroma channels
 * Take DCT of 8x8 blocks using cosine transform
 * Quantize frequency blocks
@@ -18,7 +18,7 @@
 
 JFIF encoded metadata is in the following format:
 
-* 2 B - SOI, start of image marker
+* 2 B - SOI, start of core.image marker
 * 2 B - APP0, application use marker
 * 2 B - Length of APP0 segment, equal to `16 + 3 * XThumbnail * YThumbnail`
 * 5 B - Identifier, `JFIF\0`

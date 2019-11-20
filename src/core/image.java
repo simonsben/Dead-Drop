@@ -1,3 +1,8 @@
+package core;
+
+import utilities.input;
+import utilities.output;
+import utilities.strings;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.nio.file.Path;
@@ -25,12 +30,12 @@ public class image {
     }
 
     public void save_image() {
-        String raw_filename =  utilities.remove_extension(this.filename.getFileName().toString());
+        String raw_filename =  strings.remove_extension(this.filename.getFileName().toString());
         this.save_image("processed/" + raw_filename + ".png");
     }
 
     public void save_image(String filename) {
-        String extension = utilities.get_extension(filename);
+        String extension = strings.get_extension(filename);
         extension = extension == null ? "png" : extension;
 
         save_image(filename, extension);

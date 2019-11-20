@@ -1,3 +1,7 @@
+package core;
+
+import utilities.data_management;
+import utilities.low_level;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -37,22 +41,22 @@ public class bpcs {
                     continue;
                 // X primary
                 difference = primary_row[x_index] ^ primary_row[x_index + num_channels];
-                utilities.offload_differences(edge_counts, x_block, y_block, difference);
+                data_management.offload_differences(edge_counts, x_block, y_block, difference);
 
                 // X secondary
                 difference = secondary_row[x_index] ^ secondary_row[x_index + num_channels];
-                utilities.offload_differences(edge_counts, x_block, (y + 1) / block_size, difference);
+                data_management.offload_differences(edge_counts, x_block, (y + 1) / block_size, difference);
 
                 if (y % block_size >= num_channels - 1)
                     continue;
 
                 // Y primary
                 difference = primary_row[x_index] ^ secondary_row[x_index];
-                utilities.offload_differences(edge_counts, x_block, y_block, difference);
+                data_management.offload_differences(edge_counts, x_block, y_block, difference);
 
                 if (y + 1 == height) {
                     difference = primary_row[x_index + num_channels] ^ secondary_row[x_index + num_channels];
-                    utilities.offload_differences(edge_counts, (x + 1) / block_size, y_block, difference);
+                    data_management.offload_differences(edge_counts, (x + 1) / block_size, y_block, difference);
                 }
             }
         }
@@ -117,7 +121,7 @@ public class bpcs {
         for (int x=0;x<block_size;x++) {
             for (int y=0;y<block_size;y++) {
                 image.getPixel(x, y, image_data);
-                image_data[channel] = utilities.place_bit(source, image_data[channel], bit_index, bit);
+                image_data[channel] = low_level.place_bit(source, image_data[channel], bit_index, bit);
                 image.setPixel(x, y, image_data);
 
                 bit_index++;
@@ -141,7 +145,7 @@ public class bpcs {
             for (int y=0;y<block_size;y++) {
                 image.getPixel(x, y, image_data);
 
-                current_byte = utilities.extract_bit(image_data[channel], current_byte, bit, bit_index);
+                current_byte = low_level.extract_bit(image_data[channel], current_byte, bit, bit_index);
 
                 bit_index++;
                 if (bit_index > 7) {

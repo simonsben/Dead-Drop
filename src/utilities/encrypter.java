@@ -1,3 +1,5 @@
+package utilities;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -50,10 +52,10 @@ public class encrypter {
             return null;
 
         if (operation_mode == Cipher.ENCRYPT_MODE)
-            data = utilities.concat_arrays(this.iv, data);
+            data = data_management.concat_arrays(this.iv, data);
         else if(operation_mode == Cipher.DECRYPT_MODE) {
             byte[] iv = new byte[key_length], payload = new byte[data.length - key_length];
-            utilities.split_array(data, iv, payload);
+            data_management.split_array(data, iv, payload);
 
             data = payload;
             this.iv = iv;

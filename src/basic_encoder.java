@@ -1,3 +1,4 @@
+import core.naive;
 import java.nio.ByteBuffer;
 
 public class basic_encoder extends image_encoder {
@@ -41,13 +42,13 @@ public class basic_encoder extends image_encoder {
 
 //    Code to embed multiple images, king of
 //    int image_offset = header.length, data_offset = 0, slice_length;    // Define constants
-//    image current_image;
+//    core.image current_image;
 //        for (int index=0;index<this.image_set.length;index++) {             // Add data to images
 //            current_image = this.image_set[index];
 //            slice_length = Math.min(current_image.total_capacity - image_offset, data.length - data_offset);
 //
 //            byte[] data_slice = Arrays.copyOfRange(data, data_offset, data_offset + slice_length);
-//            naive.embed_data(current_image.image, data_slice, image_offset);
+//            core.naive.embed_data(current_image.core.image, data_slice, image_offset);
 //
 //            image_offset = 0;
 //            data_offset += slice_length;

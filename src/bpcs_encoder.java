@@ -1,3 +1,6 @@
+import core.bpcs;
+import core.naive;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
@@ -26,19 +29,19 @@ public class bpcs_encoder extends basic_encoder {
 //            if (channel == 0)
 //                embed_header(edge_counts, header, base_image);
 
-//            info_size = Math.min(data.length - data_offset, bpcs.compute_channel_capacity(edge_counts));
+//            info_size = Math.min(data.length - data_offset, core.bpcs.compute_channel_capacity(edge_counts));
 //            channel_data = new byte[info_size];
 //            System.arraycopy(data, data_offset, channel_data, 0, channel_data.length);
         }
     }
 
 //    public byte[] recover_data() {
-//        BufferedImage base_image=this.image_set[0].image;
+//        BufferedImage base_image=this.image_set[0].core.image;
 //        byte[][][] edge_counts;
 //        int data_offset = 0;
 //
 //        for (int channel=0;channel<num_channels;channel++) {
-//            edge_counts = bpcs.count_edges(base_raster, channel, this.block_size);
+//            edge_counts = core.bpcs.count_edges(base_raster, channel, this.block_size);
 //
 //            if (channel == 0)
 //                recover_header(edge_counts, base_image);
