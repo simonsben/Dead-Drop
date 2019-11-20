@@ -19,7 +19,7 @@ public class bpcs {
         int[] primary_row = new int[width * num_channels], secondary_row = new int[width * num_channels], tmp;
 
         if (channel >= num_channels)
-            return null;
+            throw new IllegalArgumentException("Selected channel must exist.");
 
         image.getPixels(0, 0, width, 1, secondary_row);
         for (int y=0;y<height-1;y++) {
@@ -59,7 +59,7 @@ public class bpcs {
         return edge_counts;
     }
 
-    public static void embed_data(BufferedImage image, byte[][][] edge_counts, byte[] data, int block_size, int channel) {
+    public static void embed_data(BufferedImage image, byte[][][] edge_counts, byte[] data, int block_size, int channel, int block_offset) {
         BufferedImage sub_image;
         int data_offset = 0, block_capacity = block_size * block_size;
         byte[] data_subset = new byte[block_capacity];
@@ -69,7 +69,7 @@ public class bpcs {
                 sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
 
                 for (int bit=0;bit<8;bit++) {
-                    if (edge_counts[bit][x_index][y_index] < threshold)
+                    if (block_offset-- > 0 || edge_counts[bit][x_index][y_index] < threshold)
                         continue;
 
                     System.arraycopy(data, data_offset, data_subset, 0, Math.min(block_capacity, block_capacity - data_offset));
@@ -156,6 +156,19 @@ public class bpcs {
                 }
             }
         }
+    }
+
+    public static int compute_channel_capacity(byte[][][] edge_counts) {
+        int channel_capacity = 0;
+
+        for (int bit=0;bit<edge_counts[0].length;bit++) {
+            for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
+                for (int y_index=0;y_index<edge_counts[0][0].length;y_index++)
+                    channel_capacity += edge_counts[bit][x_index][y_index];
+            }
+        }
+
+        return channel_capacity;
     }
 
     public static void visualize_edges(WritableRaster image, byte[][][] edge_counts, int block_size, int bit) {

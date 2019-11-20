@@ -40,4 +40,8 @@ public class image {
         Raster raster = this.image.getRaster();
         this.total_capacity = raster.getWidth() * raster.getHeight() * this.num_channels / 8;
     }
+
+    public void update_capacity(int capacity) {
+        this.total_capacity = capacity;
+    }
 }
