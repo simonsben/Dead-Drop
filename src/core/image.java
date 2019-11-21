@@ -14,15 +14,15 @@ public class image {
     public byte encode_mode = -1;
     Path filename;
 
-    public image(String filename) {
+    public image(String filename, technique tech) {
         this.filename = Paths.get(filename);
-        this.load_image();
+        this.load_image(tech);
     }
 
-    public void load_image() {
+    public void load_image(technique tech) {
         this.image = input.load_image(this.filename);
         this.num_channels = this.image.getRaster().getNumBands();
-        header.decode_header(this);
+        header.decode_header(this, tech);
     }
 
     public void save_image(String filename, String file_type) {

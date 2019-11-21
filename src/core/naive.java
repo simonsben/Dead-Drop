@@ -2,10 +2,16 @@ package core;
 
 import utilities.low_level;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
-public class naive {
-    public static void embed_data(BufferedImage image, byte[] data, int offset) {
+public class naive extends technique {
+    public void analyze_image(image img) {
+        Raster raster = img.image.getRaster();
+        img.data_capacity = raster.getWidth() * raster.getHeight() * img.num_channels / 8;
+    }
+
+    public void embed_data(BufferedImage image, byte[] data, int offset) {
         WritableRaster image_raster = image.getRaster();
 
         int num_channels = image_raster.getNumBands();
@@ -50,11 +56,7 @@ public class naive {
         }
     }
 
-    public static void embed_data(BufferedImage image, byte[] data) {
-        embed_data(image, data, 0);
-    }
-
-    public static byte[] recover_data(BufferedImage image, int data_size, int offset) {
+    public byte[] recover_data(BufferedImage image, int data_size, int offset) {
         WritableRaster image_raster = image.getRaster();            // Get core.image raster
         byte[] data = new byte[data_size];
 
@@ -72,7 +74,7 @@ public class naive {
                     y = (offset * 8 / num_channels) % width;
                 }
 
-                image_raster.getPixel(x, y, target_pixel);                                          // Get pixel value
+                image_raster.getPixel(x, y, target_pixel);  // Get pixel value
 
                 // Insert hidden data into each channel
                 for (int channel=0;channel<num_channels;channel++) {
@@ -81,7 +83,7 @@ public class naive {
                         initial_load = false;
                     }
 
-                    current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_index);     // Get pixel
+                    current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_index);   // Get pixel
 
                     bit_index++;    // Increment bit index
                     if (bit_index > 7) {    // If end of byte
@@ -98,9 +100,5 @@ public class naive {
             }
         }
         return null;
-    }
-
-    public static byte[] recover_data(BufferedImage image, int data_size) {
-        return recover_data(image, data_size, 0);
     }
 }

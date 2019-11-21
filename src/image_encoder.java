@@ -1,24 +1,32 @@
 import core.image;
-
+import core.naive;
+import core.technique;
+import core.bpcs;
 import java.security.InvalidParameterException;
 
 public abstract class image_encoder {
     image[] image_set;
-    int header_length;
-    int data_capacity;
+    int header_length, data_capacity;
+    technique tech = new naive();
 
     public image_encoder(String[] filenames) {
         image[] image_set = new image[filenames.length];
         for (int index=0;index<filenames.length;index++)
-            image_set[index] = new image(filenames[index]);
+            image_set[index] = new image(filenames[index], tech);
 
         this.image_set = image_set;
         analyze_image();
     }
 
+    public void set_technique(String technique) {
+        if (technique == "naive") tech = new naive();
+//        else if (technique == "bpcs") tech = new bpcs();
+        else throw new InvalidParameterException("Encoding type not supported.");
+    }
+
     public void analyze_image() {
         for (image img : image_set) {
-            analyze_image(img);
+             tech.analyze_image(img);
             this.data_capacity += img.data_capacity;
         }
     }
@@ -35,5 +43,4 @@ public abstract class image_encoder {
 
     public abstract byte[] get_header(int data_length);
     public abstract void encode_data(byte[] data);
-    public abstract void analyze_image(image img);
 }

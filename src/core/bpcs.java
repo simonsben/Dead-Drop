@@ -16,6 +16,9 @@ import java.awt.image.WritableRaster;
 public class bpcs {
     public static byte threshold = 8;
 
+
+
+    // Counts the bit-plane edges block-wise for a given channel
     public static byte[][][] count_edges(Raster image, int channel, int block_size) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
         int x_block, y_block, x_index, difference;
