@@ -8,6 +8,8 @@ Writing software to embed data in one or multiple images
 * Add data to specific bytes in each block
 * Add checkums
 * Add original filename
+* Quality setting
+    * Increase impact on image quality (ex. enable all of LSB for BPCS or lower threshold)
 
 ## Format
 
@@ -16,13 +18,10 @@ Writing software to embed data in one or multiple images
   * 4 bytes for number of bytes in data
   * 2 bytes for core.image index (if mode 1)
   * 4 byte encoding ID (if mode 1)
-  * X byte filename list (if mode 2 or 3)
 * Encoding type
   * 0 single-file (default)
   * 1 multi-file indexed
-  * 2 multi-file header-defined
-  * 3 single-file header-defined
 
 ## Resources
 
-* Used the classic [Lena test core.image](https://www.ece.rice.edu/~wakin/images/lenaTest1.jpg)
+* Used the classic [Lena test image](https://www.ece.rice.edu/~wakin/images/lenaTest1.jpg)

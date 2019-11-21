@@ -9,19 +9,20 @@ import java.nio.file.Paths;
 
 public class image {
     public BufferedImage image;
-    public int data_capacity, num_channels, data_size, encoding_id;
+    public int data_capacity, data_size, encoding_id, num_channels;
     short image_index;
     public byte encode_mode = -1;
     Path filename;
 
     public image(String filename, technique tech) {
         this.filename = Paths.get(filename);
-        this.load_image(tech);
+        load_image(tech);
     }
 
     public void load_image(technique tech) {
-        this.image = input.load_image(this.filename);
-        this.num_channels = this.image.getRaster().getNumBands();
+        image = input.load_image(this.filename);
+        num_channels = image.getRaster().getNumBands();
+
         header.decode_header(this, tech);
     }
 
@@ -31,7 +32,7 @@ public class image {
 
     public void save_image() {
         String raw_filename =  strings.remove_extension(this.filename.getFileName().toString());
-        this.save_image("processed/" + raw_filename + ".png");
+        save_image("processed/" + raw_filename + ".png");
     }
 
     public void save_image(String filename) {

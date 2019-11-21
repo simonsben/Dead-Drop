@@ -1,7 +1,6 @@
 import core.image;
 import core.naive;
 import core.technique;
-import core.bpcs;
 import java.security.InvalidParameterException;
 
 public abstract class image_encoder {

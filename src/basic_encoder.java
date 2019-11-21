@@ -1,7 +1,5 @@
 import core.header;
 import core.image;
-import core.naive;
-import core.technique;
 
 public class basic_encoder extends image_encoder {
     image base_image;
@@ -24,11 +22,11 @@ public class basic_encoder extends image_encoder {
     public void encode_data(byte[] data) {
         has_capacity(data.length);
 
-        tech.embed_data(this.image_set[0].image, get_header(data.length));      // Embed header
-        tech.embed_data(this.image_set[0].image, data, this.header_length);     // Embed data
+        tech.embed_data(base_image, get_header(data.length));      // Embed header
+        tech.embed_data(base_image, data, this.header_length);     // Embed data
     }
 
     public byte[] decode_data() {
-        return tech.recover_data(base_image.image, base_image.data_size, this.header_length);   // Recover data
+        return tech.recover_data(base_image, base_image.data_size, this.header_length);   // Recover data
     }
 }

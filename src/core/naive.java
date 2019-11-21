@@ -1,7 +1,6 @@
 package core;
 
 import utilities.low_level;
-import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
@@ -11,11 +10,11 @@ public class naive extends technique {
         img.data_capacity = raster.getWidth() * raster.getHeight() * img.num_channels / 8;
     }
 
-    public void embed_data(BufferedImage image, byte[] data, int offset) {
-        WritableRaster image_raster = image.getRaster();
+    public void embed_data(image img, byte[] data, int offset) {
+        WritableRaster image_raster = img.image.getRaster();
 
         int num_channels = image_raster.getNumBands();
-        int height = image.getHeight(), width = image.getWidth();
+        int height = image_raster.getHeight(), width = image_raster.getWidth();
         int byte_index = 0, bit_index = 0, source = data[0];
 
         int[] target_image = new int[num_channels];
@@ -56,12 +55,12 @@ public class naive extends technique {
         }
     }
 
-    public byte[] recover_data(BufferedImage image, int data_size, int offset) {
-        WritableRaster image_raster = image.getRaster();            // Get core.image raster
+    public byte[] recover_data(image img, int data_size, int offset) {
+        WritableRaster image_raster = img.image.getRaster();            // Get core.image raster
         byte[] data = new byte[data_size];
 
         int num_channels = image_raster.getNumBands();              // Get number of channels in core.image
-        int height = image.getHeight(), width = image.getWidth();   // Get height and width of core.image
+        int height = image_raster.getHeight(), width = image_raster.getWidth();   // Get height and width of core.image
         int byte_index = 0, bit_index = 0, current_byte = 0;        // Allocate indexes
 
         int[] target_pixel = new int[num_channels];                 // Allocate byte array to extract core.image data
