@@ -26,7 +26,7 @@ public class bpcs_encoder extends basic_encoder {
 
         byte[][][] edge_counts;
         for (int channel=0;channel<num_channels;channel++) {
-            edge_counts = bpcs.count_edges(base_raster, channel, this.block_size);
+//            edge_counts = bpcs.count_edges(base_raster, channel, this.block_size);
 
 //            if (channel == 0)
 //                embed_header(edge_counts, header, base_image);
@@ -90,7 +90,7 @@ public class bpcs_encoder extends basic_encoder {
                     System.arraycopy(header, data_offset, info_block, 0, info_size);
 
                     sub_image = image.getSubimage(x_index * block_size, x_index * block_size, block_size, block_size);
-                    bpcs.embed_block(sub_image.getRaster(), info_block, block_size, 0, 0);
+//                    bpcs.embed_block(sub_image.getRaster(), info_block, block_size, 0, 0);
                 }
 
                 data_offset += info_size;

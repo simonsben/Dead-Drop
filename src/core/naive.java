@@ -11,6 +11,10 @@ public class naive extends technique {
     }
 
     public void embed_data(image img, byte[] data, int offset) {
+        embed_data(img, data, offset, 0);
+    }
+
+    public void embed_data(image img, byte[] data, int offset, int bit_plane) {
         WritableRaster image_raster = img.image.getRaster();
 
         int num_channels = image_raster.getNumBands();
@@ -35,7 +39,7 @@ public class naive extends technique {
                         initial_load = false;
                     }
 
-                    target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index);
+                    target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index, bit_plane);
 
                     bit_index++;
                     if (bit_index > 7) {
@@ -56,8 +60,16 @@ public class naive extends technique {
     }
 
     public byte[] recover_data(image img, int data_size, int offset) {
-        WritableRaster image_raster = img.image.getRaster();            // Get core.image raster
         byte[] data = new byte[data_size];
+        return recover_data(img, data, offset);
+    }
+
+    public byte[] recover_data(image img, byte[] data, int offset) {
+        return recover_data(img, data, offset, 0);
+    }
+
+    public byte[] recover_data(image img, byte[] data, int offset, int bit_plane) {
+        WritableRaster image_raster = img.image.getRaster();            // Get core.image raster
 
         int num_channels = image_raster.getNumBands();              // Get number of channels in core.image
         int height = image_raster.getHeight(), width = image_raster.getWidth();   // Get height and width of core.image
@@ -82,7 +94,7 @@ public class naive extends technique {
                         initial_load = false;
                     }
 
-                    current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_index);   // Get pixel
+                    current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_plane, bit_index);   // Get pixel
 
                     bit_index++;    // Increment bit index
                     if (bit_index > 7) {    // If end of byte

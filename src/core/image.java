@@ -19,6 +19,8 @@ public class image {
         load_image(tech);
     }
 
+    public image() {}
+
     public void load_image(technique tech) {
         image = input.load_image(this.filename);
         num_channels = image.getRaster().getNumBands();

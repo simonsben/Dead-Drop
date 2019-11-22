@@ -8,7 +8,7 @@ public class header {
     static byte signature_mask = (byte) 0xF8;
 
     public static void decode_header(image img, technique tech) {
-        byte raw = tech.recover_data(img.image, 1)[0];     // Get first byte
+        byte raw = tech.recover_data(img, 1)[0];     // Get first byte
         if ((raw & signature_mask) != signature)    // Check if encoder signature is present
             return;
 
@@ -31,7 +31,7 @@ public class header {
         img.encode_mode = 1;
 
         // Get data size
-        byte[] tmp = tech.recover_data(img.image, 4, 1);
+        byte[] tmp = tech.recover_data(img, 4, 1);
         img.data_size = ByteBuffer.wrap(tmp).getInt();
     }
 }

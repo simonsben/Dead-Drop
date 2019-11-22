@@ -1,7 +1,7 @@
 package core;
 
 import utilities.data_management;
-import utilities.low_level;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -16,20 +16,21 @@ import java.util.HashMap;
 
 public class bpcs extends technique {
     class info_set {
-        public byte[][][][] edge_counts;
-        public int[] channel_capacities;
-        public int[][] bit_plane_capacities;
+        byte[][][][] edge_counts;
+        int[] channel_capacities;
 
-        public info_set(byte[][][][] _edge_counts, int[] _channel_capacities, int[][] _bit_plane_capacities) {
+        info_set(byte[][][][] _edge_counts, int[] _channel_capacities) {
             edge_counts = _edge_counts;
             channel_capacities = _channel_capacities;
-            bit_plane_capacities = _bit_plane_capacities;
         }
     }
 
+
     public static byte threshold = 8;
-    public int block_size = 8;
-    HashMap<image, info_set> image_cache;
+    private int block_size = 8, block_capacity = block_size * block_size / 8;
+    private static naive naive_encoder = new naive();
+    private HashMap<image, info_set> image_cache = new HashMap<>();
+
 
     public void analyze_image(image img) {
         if (image_cache.containsKey(img))
@@ -37,35 +38,34 @@ public class bpcs extends technique {
 
         Raster raster = img.image.getRaster();
         byte[][][][] image_edge_counts = new byte[img.num_channels][][][];
-        int[][] bit_plane_capacities = new int[img.num_channels][];
         int[] channel_capacities = new int[img.num_channels];
 
         for (int channel=0;channel<img.num_channels;channel++) {
             image_edge_counts[channel] = count_edges(raster, channel);
-            bit_plane_capacities[channel] = bit_plane_capacity(image_edge_counts[channel]);
-
-            for (int plane=0;plane<8;plane++)
-                channel_capacities[channel] += bit_plane_capacities[channel][plane];
+            channel_capacities[channel] += channel_capacity(image_edge_counts[channel]);
         }
 
-        image_cache.put(img, new info_set(image_edge_counts, channel_capacities, bit_plane_capacities));
+        image_cache.put(img, new info_set(image_edge_counts, channel_capacities));
     }
 
-    public static int[] bit_plane_capacity(byte[][][] edge_counts) {
-        int[] plane_capacity = new int[8];
+
+    public static int channel_capacity(byte[][][] edge_counts) {
+        int channel_capacity = 0;
 
         for (int bit=0;bit<edge_counts[0].length;bit++) {
             for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
                 for (int y_index=0;y_index<edge_counts[0][0].length;y_index++)
-                    plane_capacity[bit] += edge_counts[bit][x_index][y_index];
+                    channel_capacity += edge_counts[bit][x_index][y_index];
             }
         }
 
-        return plane_capacity;
+        return channel_capacity;
     }
 
 
     // Counts the bit-plane edges block-wise for a given channel
+    // Edge count dimension order: bit-plane, x block, y block
+    // TODO modify to count edges for all channels at once
     public byte[][][] count_edges(Raster image, int channel) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
         int x_block, y_block, x_index, difference;
@@ -110,80 +110,87 @@ public class bpcs extends technique {
                 }
             }
         }
+        if (channel == 0) edge_counts[0][0][0] = 0x7F;  // Mark base block of base channel for header
+
         return edge_counts;
     }
+
 
     public void embed_data(image img, byte[] data, int offset) {
         info_set image_info = image_cache.get(img);
 
-        BufferedImage sub_image;
-        int data_offset = 0, block_capacity = block_size * block_size;
+        image sub_image = new image();
+        int byte_offset = 0;
         byte[] data_subset = new byte[block_capacity];
+        byte[][][][] edge_counts = image_info.edge_counts;
+        boolean first = true;
 
-//        for (int x_index=0;x_index<edge_counts[0].length;x_index++){
-//            for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
-//                sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
-//
-//                for (int bit=0;bit<8;bit++) {
-//                    offset -= block_capacity;
-//                    if (block_offset-- > 0 || edge_counts[bit][x_index][y_index] < threshold)
-//                        continue;
-//
-//                    System.arraycopy(data, data_offset, data_subset, 0, Math.min(block_capacity, block_capacity - data_offset));
-//                    data_offset += block_capacity;
-//
-//                    embed_block(sub_image.getRaster(), data_subset, block_size, channel, bit);
-//                    if (data_offset >= data.length)
-//                        return;
-//                }
-//            }
-//        }
+        for (int channel=0;channel<img.num_channels;channel++) {                    // For each channel
+            for (int x_index=0;x_index<edge_counts[0].length;x_index++){            // For each block on x axis
+                for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {    // For each block on y axis
+                    sub_image.image = get_sub_image(img, x_index, y_index);
+
+                    for (int plane=0;plane<8;plane++) {
+                        if (edge_counts[channel][plane][x_index][y_index] < threshold)
+                            continue;
+                        if (first && (offset -= block_capacity) > 0)    // Skip blocks until
+                            continue;
+                        else if (first) {
+                            first = false;
+                            offset += (offset == 0)? 0 : block_capacity;
+                            insert_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                        }
+                        byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane);
+                    }
+                }
+            }
+        }
     }
 
-//    public void embed_data(BufferedImage image, byte[] data, int channel, int block_offset) {
-//        BufferedImage sub_image;
-//        int data_offset = 0, block_capacity = block_size * block_size;
-//        byte[] data_subset = new byte[block_capacity];
-//
-//        for (int x_index=0;x_index<edge_counts[0].length;x_index++){
-//            for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
-//                sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
-//
-//                for (int bit=0;bit<8;bit++) {
-//                    if (block_offset-- > 0 || edge_counts[bit][x_index][y_index] < threshold)
-//                        continue;
-//
-//                    System.arraycopy(data, data_offset, data_subset, 0, Math.min(block_capacity, block_capacity - data_offset));
-//                    data_offset += block_capacity;
-//
-//                    embed_block(sub_image.getRaster(), data_subset, block_size, channel, bit);
-//                    if (data_offset >= data.length)
-//                        return;
-//                }
-//            }
-//        }
-//    }
 
-    public byte[] recover_data(BufferedImage image, byte[][][] edge_counts, int data_length, int block_size, int channel) {
-        BufferedImage sub_image;
-        byte[] data = new byte[data_length];
-        int data_offset = 0, block_capacity = block_size * block_size;
-        byte[] data_subset = new byte[block_capacity];
+    BufferedImage get_sub_image(image img, int x_index, int y_index) {
+        return img.image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
+    }
 
-        for (int x_index=0;x_index<edge_counts[0].length;x_index++){
-            for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {
-                sub_image = image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
 
-                for (int bit=0;bit<8;bit++) {
-                    if (edge_counts[bit][x_index][y_index] < threshold)
-                        continue;
+    int insert_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane) {
+        int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
+        if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
-                    recover_block(sub_image.getRaster(), data_subset, block_size, channel, bit);
-                    System.arraycopy(data_subset, 0, data, data_offset, Math.min(block_capacity, block_capacity - data_offset));
-                    data_offset += block_capacity;
+        System.arraycopy(data, byte_offset, data_subset, 0, data_size);                 // Copy data
+        byte_offset += data_size;                                                               // Increment data offset
 
-                    if (data_offset >= data_length)
-                        return data;
+        naive_encoder.embed_data(sub_image, data_subset, image_offset, bit_plane);              // Encode data
+        return byte_offset;
+    }
+
+
+    public byte[] recover_data(image img, int data_size, int offset) {
+        info_set image_info = image_cache.get(img);
+
+        image sub_image = new image();
+        int byte_offset = 0;
+        byte[] data_subset = new byte[block_capacity], data = new byte[data_size];
+        byte[][][][] edge_counts = image_info.edge_counts;
+        boolean first = true;
+
+        for (int channel=0;channel<img.num_channels;channel++) {                    // For each channel
+            for (int x_index=0;x_index<edge_counts[0].length;x_index++){            // For each block on x axis
+                for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {    // For each block on y axis
+                    sub_image.image = get_sub_image(img, x_index, y_index);
+
+                    for (int plane=0;plane<8;plane++) {
+                        if (edge_counts[channel][plane][x_index][y_index] < threshold)
+                            continue;
+                        if (first && (offset -= block_capacity) > 0)    // Skip blocks until
+                            continue;
+                        else if (first) {
+                            first = false;
+                            offset += (offset == 0)? 0 : block_capacity;
+                            extract_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                        }
+                        byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane);
+                    }
                 }
             }
         }
@@ -191,53 +198,18 @@ public class bpcs extends technique {
         return data;
     }
 
-    public void embed_block(WritableRaster image, byte[] data, int block_size, int channel, int bit) {
-        int bit_index = 0, byte_index = 0, source = data[0];
-        int[] image_data = new int[image.getNumBands()];
+    int extract_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane) {
+        int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
+        if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
-        for (int x=0;x<block_size;x++) {
-            for (int y=0;y<block_size;y++) {
-                image.getPixel(x, y, image_data);
-                image_data[channel] = low_level.place_bit(source, image_data[channel], bit_index, bit);
-                image.setPixel(x, y, image_data);
+        naive_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane);
 
-                bit_index++;
-                if (bit_index > 7) {
-                    bit_index = 0;  // Reset bit index
+        System.arraycopy(data_subset, 0, data, byte_offset, data_size);                 // Copy data
+        byte_offset += data_size;                                                              // Increment data offset
 
-                    byte_index++;                       // Increment byte index
-                    if (byte_index >= data.length)      // If no more data, stop
-                        return;
-                    source = data[byte_index];      // Get next byte to embed
-                }
-            }
-        }
+        return byte_offset;
     }
 
-    public void recover_block(Raster image, byte[] data, int block_size, int channel, int bit) {
-        int bit_index = 0, byte_index = 0, current_byte = 0;
-        int[] image_data = new int[image.getNumBands()];
-
-        for (int x=0;x<block_size;x++) {
-            for (int y=0;y<block_size;y++) {
-                image.getPixel(x, y, image_data);
-
-                current_byte = low_level.extract_bit(image_data[channel], current_byte, bit, bit_index);
-
-                bit_index++;
-                if (bit_index > 7) {
-                    bit_index = 0;  // Reset bit index
-                    data[byte_index] = (byte) current_byte;
-
-                    byte_index++;                       // Increment byte index
-                    if (byte_index >= data.length)      // If no more space for data, stop
-                        return;
-
-                    current_byte = 0;
-                }
-            }
-        }
-    }
 
     public static void visualize_edges(WritableRaster image, byte[][][] edge_counts, int block_size, int bit) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
@@ -259,6 +231,7 @@ public class bpcs extends technique {
         }
     }
 
+
     public static void add_square_mask(WritableRaster image, int block_size, int channel) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
         int[] row = new int[width * num_channels];
@@ -279,6 +252,7 @@ public class bpcs extends technique {
             image.setPixels(0, y, width, 1, row);
         }
     }
+
 
     public static void add_square_mask(WritableRaster image, int channel) {
         add_square_mask(image, 8, channel);

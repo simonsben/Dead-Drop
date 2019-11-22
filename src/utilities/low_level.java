@@ -2,7 +2,6 @@ package utilities;
 
 public class low_level {
     public static int base_bit = ~1;
-    public static int byte_mask = 0xFF;
 
     // Generates mask to isolate the bit at the given index
     public static int get_mask(int index) {
@@ -17,10 +16,10 @@ public class low_level {
 
     // Inserts bit from given index of source into LSB of the target
     public static int insert_bit(int source, int target, int index) {
-        return (target & base_bit) | get_bit(source, index) >> index;
+        return insert_bit(source, target, index, 0);
     }
 
-    public static int place_bit(int source, int target, int source_index, int target_index) {
+    public static int insert_bit(int source, int target, int source_index, int target_index) {
         int source_bit = get_bit(source, source_index), offset = target_index - source_index;
         source_bit = (offset < 0)? source_bit >> -offset : source_bit << offset;
 
@@ -33,7 +32,10 @@ public class low_level {
     }
 
     public static int extract_bit(int source, int target, int source_index, int target_index) {
-        return (get_bit(source, source_index) << target_index) | target;
+        int offset = target_index - source_index, source_bit = get_bit(source, source_index);
+        int prepared_source = (offset < 0)? source_bit >> -offset : source_bit << offset;
+
+        return prepared_source | target;
     }
 
 }
