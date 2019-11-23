@@ -10,11 +10,11 @@ public class naive extends technique {
         img.data_capacity = raster.getWidth() * raster.getHeight() * img.num_channels / 8;
     }
 
-    public void embed_data(image img, byte[] data, int offset) {
-        embed_data(img, data, offset, 0);
+    public int embed_data(image img, byte[] data, int offset) {
+        return embed_data(img, data, offset, 0);
     }
 
-    public void embed_data(image img, byte[] data, int offset, int bit_plane) {
+    public int embed_data(image img, byte[] data, int offset, int bit_plane) {
         WritableRaster image_raster = img.image.getRaster();
 
         int num_channels = image_raster.getNumBands();
@@ -48,7 +48,7 @@ public class naive extends technique {
                         byte_index++;                       // Increment byte index
                         if (byte_index >= data.length) {    // If no more data, stop
                             image_raster.setPixel(x, y, target_image);      // Set pixel value before stopping
-                            return;
+                            return data.length;
                         }
 
                         source = data[byte_index];      // Get next byte to embed
@@ -57,6 +57,7 @@ public class naive extends technique {
                 image_raster.setPixel(x, y, target_image);          // Set pixel value
             }
         }
+        return data.length;
     }
 
     public byte[] recover_data(image img, int data_size, int offset) {

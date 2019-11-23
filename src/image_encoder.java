@@ -21,7 +21,6 @@ public abstract class image_encoder {
         analyze_image();
     }
 
-
     public void set_technique(String technique_name) {
         if (technique_name.equals("naive")) tech = new naive();
         else if (technique_name.equals("bpcs")) tech = new bpcs();

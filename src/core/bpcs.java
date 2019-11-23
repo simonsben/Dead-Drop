@@ -7,17 +7,10 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
 
-// TODO List of functions to implement
-/*
-    -encode_block(raster, x_index, y_index, data)
-    -encode_data(raster, data
-
- */
-
 public class bpcs extends technique {
-    class info_set {
-        byte[][][][] edge_counts;
-        int[] channel_capacities;
+    public class info_set {
+        public byte[][][][] edge_counts;
+        public int[] channel_capacities;
 
         info_set(byte[][][][] _edge_counts, int[] _channel_capacities) {
             edge_counts = _edge_counts;
@@ -28,14 +21,21 @@ public class bpcs extends technique {
     public static byte threshold = 8;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static naive naive_encoder = new naive();
-    private static encrypter encrypt_manager = new encrypter();
-    private HashMap<image, info_set> image_cache = new HashMap<>();
+    private encrypter encrypt_manager;
+    public HashMap<image, info_set> image_cache = new HashMap<>();
 
+    public bpcs() {
+        encrypt_manager = new encrypter();
+    }
+
+    public bpcs(String plaintext) {
+        this();
+        set_encryption_key(plaintext);
+    }
 
     public void set_encryption_key(String plaintext) {
         encrypt_manager.add_key(plaintext);
     }
-
 
     public void analyze_image(image img) {
         if (image_cache.containsKey(img))
@@ -56,7 +56,6 @@ public class bpcs extends technique {
         image_cache.put(img, new info_set(image_edge_counts, channel_capacities));
     }
 
-
     public static int channel_capacity(byte[][][] edge_counts) {
         int channel_capacity = 0;
 
@@ -69,7 +68,6 @@ public class bpcs extends technique {
 
         return channel_capacity;
     }
-
 
     // Counts the bit-plane edges block-wise for a given channel
     // Edge count dimension order: bit-plane, x block, y block
@@ -123,8 +121,7 @@ public class bpcs extends technique {
         return edge_counts;
     }
 
-
-    public void embed_data(image img, byte[] data, int offset) {
+    public int embed_data(image img, byte[] data, int offset) {
         if (!(offset <= 1 && data.length < block_capacity))
             data = encrypt_manager.encrypt_data(data);
 
@@ -136,9 +133,11 @@ public class bpcs extends technique {
         byte[][][][] edge_counts = image_info.edge_counts;
         boolean first = true;
 
+        int x_blocks = edge_counts[0][0].length / block_size, y_blocks = edge_counts[0][0][0].length / block_size;
+
         for (int channel=0;channel<img.num_channels;channel++) {                    // For each channel
-            for (int x_index=0;x_index<edge_counts[0].length;x_index++){            // For each block on x axis
-                for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {    // For each block on y axis
+            for (int x_index=0;x_index<x_blocks;x_index++){            // For each block on x axis
+                for (int y_index=0;y_index<y_blocks;y_index++) {    // For each block on y axis
                     sub_image.image = get_sub_image(img, x_index, y_index);
 
                     for (int plane=0;plane<8;plane++) {
@@ -153,34 +152,28 @@ public class bpcs extends technique {
                         } else
                             byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane);
 
-                        if (byte_offset >= data.length) {
-                            System.out.printf("Breaking at %d\n", byte_offset);
-                            return;
-                        }
+                        if (byte_offset >= data.length) return data.length;
                     }
                 }
             }
         }
+        return data.length;
     }
-
 
     BufferedImage get_sub_image(image img, int x_index, int y_index) {
         return img.image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
     }
 
-
     int insert_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane) {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
-        System.out.printf("Insert subset length %d\n", data_size);
         System.arraycopy(data, byte_offset, data_subset, 0, data_size);                 // Copy data
         byte_offset += data_size;                                                               // Increment data offset
 
         naive_encoder.embed_data(sub_image, data_subset, image_offset, bit_plane);              // Encode data
         return byte_offset;
     }
-
 
     public byte[] recover_data(image img, int data_size, int offset) {
         if (!image_cache.containsKey(img)) analyze_image(img);
@@ -192,9 +185,11 @@ public class bpcs extends technique {
         byte[][][][] edge_counts = image_info.edge_counts;
         boolean first = true;
 
+        int x_blocks = edge_counts[0][0].length / block_size, y_blocks = edge_counts[0][0][0].length / block_size;
+
         for (int channel=0;channel<img.num_channels;channel++) {                    // For each channel
-            for (int x_index=0;x_index<edge_counts[0].length;x_index++){            // For each block on x axis
-                for (int y_index=0;y_index<edge_counts[0][0].length;y_index++) {    // For each block on y axis
+            for (int x_index=0;x_index<x_blocks;x_index++){            // For each block on x axis
+                for (int y_index=0;y_index<y_blocks;y_index++) {    // For each block on y axis
                     sub_image.image = get_sub_image(img, x_index, y_index);
 
                     for (int plane=0;plane<8;plane++) {
@@ -205,7 +200,6 @@ public class bpcs extends technique {
                         else if (first) {
                             first = false;
                             offset += (offset == 0)? 0 : block_capacity;
-//                            System.out.printf("extracting at %d %d with offset %d\n", x_index, y_index, offset);
 
                             byte_offset = extract_data(sub_image, data, data_subset, offset, byte_offset, plane);
                         } else
@@ -231,7 +225,6 @@ public class bpcs extends technique {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
-        System.out.printf("Extract subset length %d\n", data_size);
         naive_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane);
 
         System.arraycopy(data_subset, 0, data, byte_offset, data_size);                 // Copy data
@@ -239,7 +232,6 @@ public class bpcs extends technique {
 
         return byte_offset;
     }
-
 
     public static void visualize_edges(WritableRaster image, byte[][][] edge_counts, int block_size, int bit) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
@@ -261,7 +253,6 @@ public class bpcs extends technique {
         }
     }
 
-
     public static void add_square_mask(WritableRaster image, int block_size, int channel) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
         int[] row = new int[width * num_channels];
@@ -282,7 +273,6 @@ public class bpcs extends technique {
             image.setPixels(0, y, width, 1, row);
         }
     }
-
 
     public static void add_square_mask(WritableRaster image, int channel) {
         add_square_mask(image, 8, channel);

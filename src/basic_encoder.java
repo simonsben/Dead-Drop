@@ -1,7 +1,5 @@
 import core.header;
 import core.image;
-import core.bpcs;
-import utilities.encrypter;
 
 public class basic_encoder extends image_encoder {
     image base_image;
@@ -21,15 +19,16 @@ public class basic_encoder extends image_encoder {
             return null;
 
         base_image.encode_mode = 1;
-        base_image.data_size = data_length + ((tech instanceof bpcs)? encrypter.key_length : 0);
+        base_image.data_size = data_length;
         return header.generate_mode_one(base_image);
     }
 
     public void encode_data(byte[] data) {
         has_capacity(data.length);
 
-        tech.embed_data(base_image, get_header(data.length));      // Embed header
-        tech.embed_data(base_image, data, this.header_length);     // Embed data
+        int data_length = tech.embed_data(base_image, data, this.header_length);     // Embed data
+        tech.embed_data(base_image, get_header(data_length));                        // Embed header
+        System.out.printf("Encoded with length %d\n", data_length);
 
         System.out.println("Data encoded.");
     }
