@@ -1,7 +1,7 @@
 package core;
 
 import utilities.data_management;
-
+import utilities.encrypter;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -25,11 +25,16 @@ public class bpcs extends technique {
         }
     }
 
-
     public static byte threshold = 8;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static naive naive_encoder = new naive();
+    private static encrypter encrypt_manager = new encrypter();
     private HashMap<image, info_set> image_cache = new HashMap<>();
+
+
+    public void set_encryption_key(String plaintext) {
+        encrypt_manager.add_key(plaintext);
+    }
 
 
     public void analyze_image(image img) {
@@ -39,12 +44,15 @@ public class bpcs extends technique {
         Raster raster = img.image.getRaster();
         byte[][][][] image_edge_counts = new byte[img.num_channels][][][];
         int[] channel_capacities = new int[img.num_channels];
+        int capacity = 0;
 
         for (int channel=0;channel<img.num_channels;channel++) {
             image_edge_counts[channel] = count_edges(raster, channel);
-            channel_capacities[channel] += channel_capacity(image_edge_counts[channel]);
+            channel_capacities[channel] = channel_capacity(image_edge_counts[channel]);
+            capacity += channel_capacities[channel];
         }
 
+        img.data_capacity = capacity;
         image_cache.put(img, new info_set(image_edge_counts, channel_capacities));
     }
 
@@ -52,10 +60,10 @@ public class bpcs extends technique {
     public static int channel_capacity(byte[][][] edge_counts) {
         int channel_capacity = 0;
 
-        for (int bit=0;bit<edge_counts[0].length;bit++) {
+        for (int plane=0;plane<8;plane++) {
             for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
                 for (int y_index=0;y_index<edge_counts[0][0].length;y_index++)
-                    channel_capacity += edge_counts[bit][x_index][y_index];
+                    channel_capacity += edge_counts[plane][x_index][y_index];
             }
         }
 
@@ -117,6 +125,9 @@ public class bpcs extends technique {
 
 
     public void embed_data(image img, byte[] data, int offset) {
+        if (!(offset <= 1 && data.length < block_capacity))
+            data = encrypt_manager.encrypt_data(data);
+
         info_set image_info = image_cache.get(img);
 
         image sub_image = new image();
@@ -138,9 +149,14 @@ public class bpcs extends technique {
                         else if (first) {
                             first = false;
                             offset += (offset == 0)? 0 : block_capacity;
-                            insert_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                            byte_offset = insert_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                        } else
+                            byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane);
+
+                        if (byte_offset >= data.length) {
+                            System.out.printf("Breaking at %d\n", byte_offset);
+                            return;
                         }
-                        byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane);
                     }
                 }
             }
@@ -157,6 +173,7 @@ public class bpcs extends technique {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
+        System.out.printf("Insert subset length %d\n", data_size);
         System.arraycopy(data, byte_offset, data_subset, 0, data_size);                 // Copy data
         byte_offset += data_size;                                                               // Increment data offset
 
@@ -166,6 +183,7 @@ public class bpcs extends technique {
 
 
     public byte[] recover_data(image img, int data_size, int offset) {
+        if (!image_cache.containsKey(img)) analyze_image(img);
         info_set image_info = image_cache.get(img);
 
         image sub_image = new image();
@@ -187,13 +205,24 @@ public class bpcs extends technique {
                         else if (first) {
                             first = false;
                             offset += (offset == 0)? 0 : block_capacity;
-                            extract_data(sub_image, data, data_subset, offset, byte_offset, plane);
+//                            System.out.printf("extracting at %d %d with offset %d\n", x_index, y_index, offset);
+
+                            byte_offset = extract_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                        } else
+                            byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane);
+
+                        if (byte_offset >= data.length) {
+                            if (!(offset <= 1 && data.length < block_capacity))
+                                return encrypt_manager.decrypt_data(data);
+                            return data;
                         }
-                        byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane);
                     }
                 }
             }
         }
+
+        if (!(offset == 0 && data.length < block_capacity))
+            data = encrypt_manager.decrypt_data(data);
 
         return data;
     }
@@ -202,6 +231,7 @@ public class bpcs extends technique {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
+        System.out.printf("Extract subset length %d\n", data_size);
         naive_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane);
 
         System.arraycopy(data_subset, 0, data, byte_offset, data_size);                 // Copy data

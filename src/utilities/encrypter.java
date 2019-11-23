@@ -14,9 +14,9 @@ import java.util.Arrays;
 public class encrypter {
     private SecretKeySpec secret_key;
     private byte[] key;
-    byte[] iv;
+    private byte[] iv;
 
-    private static int key_length = 16;
+    public static int key_length = 16;
     private static String encrypt_type = "AES";
     private static String hash_type = "SHA-1";
 
@@ -31,6 +31,11 @@ public class encrypter {
             e.printStackTrace();
         }
         generate_iv();
+    }
+
+    public void add_key() {
+        System.out.println("----- WARNING: Default key being used for encryption -----");
+        add_key("123456");
     }
 
     // Checks whether the instance has a key
@@ -48,8 +53,7 @@ public class encrypter {
 
     // Run encrypt/decrypt operation
     byte[] run_crypt_operation(int operation_mode, byte[] data)  {
-        if (!this.has_key())
-            return null;
+        if (!this.has_key()) add_key();
 
         if (operation_mode == Cipher.ENCRYPT_MODE)
             data = data_management.concat_arrays(this.iv, data);

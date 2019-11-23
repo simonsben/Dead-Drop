@@ -9,8 +9,10 @@ public class header {
 
     public static void decode_header(image img, technique tech) {
         byte raw = tech.recover_data(img, 1)[0];     // Get first byte
-        if ((raw & signature_mask) != signature)    // Check if encoder signature is present
+        if ((raw & signature_mask) != signature) {  // Check if encoder signature is present
+            System.out.println("Skipping image, signature not present.");
             return;
+        }
 
         byte mode = (byte) (raw & ~signature_mask);
 

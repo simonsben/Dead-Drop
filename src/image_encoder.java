@@ -1,5 +1,6 @@
 import core.image;
 import core.naive;
+import core.bpcs;
 import core.technique;
 import java.security.InvalidParameterException;
 
@@ -8,7 +9,10 @@ public abstract class image_encoder {
     int header_length, data_capacity;
     technique tech = new naive();
 
-    public image_encoder(String[] filenames) {
+
+    public image_encoder(String[] filenames, String technique_name) {
+        set_technique(technique_name);
+
         image[] image_set = new image[filenames.length];
         for (int index=0;index<filenames.length;index++)
             image_set[index] = new image(filenames[index], tech);
@@ -17,9 +21,10 @@ public abstract class image_encoder {
         analyze_image();
     }
 
-    public void set_technique(String technique) {
-        if (technique == "naive") tech = new naive();
-//        else if (technique == "bpcs") tech = new bpcs();
+
+    public void set_technique(String technique_name) {
+        if (technique_name.equals("naive")) tech = new naive();
+        else if (technique_name.equals("bpcs")) tech = new bpcs();
         else throw new InvalidParameterException("Encoding type not supported.");
     }
 
