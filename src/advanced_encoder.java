@@ -1,6 +1,9 @@
 import core.header;
 import core.image;
 
+import static utilities.data_management.concat_arrays;
+import static utilities.data_management.get_sub_array;
+
 public class advanced_encoder extends image_encoder {
     public advanced_encoder(String[] filenames, String technique_name) {
         super(filenames, technique_name);
@@ -11,26 +14,40 @@ public class advanced_encoder extends image_encoder {
         this(filenames, "naive");
     }
 
-    public byte[] get_header(int data_length) {
-        if (base_image.data_capacity < data_length + header_length)
-            return null;
+    byte[] get_header(image img, int data_length) {
+        if (img.data_capacity < data_length + header_length)
+            throw new IllegalArgumentException("Target image doesn't have the capacity to embed the given data");
 
-        base_image.encode_mode = 1;
-        base_image.data_size = data_length;
-        return header.generate_mode_one(base_image, tech);
+        img.encode_mode = 1;
+        img.data_size = data_length;
+        return header.generate_mode_one(img, tech);
     }
 
     public void encode_data(byte[] data) {
         has_capacity(data.length);
+        byte[] data_subset;
+        int byte_offset = 0, data_size;
 
-        int data_length = tech.embed_data(base_image, data, this.header_length);     // Embed data
-        tech.embed_data(base_image, get_header(data_length));                        // Embed header
+        for (image img : image_set) {
+            data_size = Math.min(img.data_capacity, data.length - byte_offset); // Get data subset length
+            data_subset = get_sub_array(data, byte_offset, data_size);          // Get data subset
+
+            int data_length = tech.embed_data(img, data_subset, data_size);     // Embed data
+            tech.embed_data(img, get_header(img, data_length));                 // Embed header
+        }
     }
 
     public byte[] decode_data() {
-        if (base_image.encode_mode == -1)
-            throw new IllegalArgumentException("Provided file does not have data encoded in it.");
+        byte[] data = new byte[0], image_data;
 
-        return tech.recover_data(base_image, base_image.data_size, this.header_length);   // Recover data
+        for (image img : image_set) {
+            if (img.encode_mode == -1)
+                throw new IllegalArgumentException("Provided file does not have data encoded in it.");
+
+            image_data = tech.recover_data(img, img.data_size, header_length);
+            data = concat_arrays(data, image_data);
+        }
+
+        return data;
     }
 }

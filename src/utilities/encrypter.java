@@ -16,26 +16,26 @@ public class encrypter {
     private byte[] key;
     private byte[] iv;
 
-    public static int key_length = 16;
+    public static int iv_length = 16;
     private static String encrypt_type = "AES";
     private static String hash_type = "SHA-1";
 
     // Takes plaintext key, prepares it, and generates IV
-    public void add_key(String plaintext_key) {
+    public void set_key(String plaintext_key) {
         MessageDigest sha;
         try {
             sha = MessageDigest.getInstance(hash_type);     // Initialize hasher
             key = sha.digest(plaintext_key.getBytes());     // Get hash of key
-            secret_key = new SecretKeySpec(Arrays.copyOf(key, key_length), encrypt_type);      // Generate secret key
+            secret_key = new SecretKeySpec(Arrays.copyOf(key, iv_length), encrypt_type);      // Generate secret key
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         generate_iv();
     }
 
-    public void add_key() {
+    public void set_key() {
         System.out.println("----- WARNING: Default key being used for encryption -----");
-        add_key("123456");
+        set_key("123456");
     }
 
     // Checks whether the instance has a key
@@ -47,18 +47,18 @@ public class encrypter {
     void generate_iv() {
         SecureRandom generator = new SecureRandom();
 
-        this.iv = new byte[key_length];
+        this.iv = new byte[iv_length];
         generator.nextBytes(this.iv);
     }
 
     // Run encrypt/decrypt operation
     byte[] run_crypt_operation(int operation_mode, byte[] data)  {
-        if (!this.has_key()) add_key();
+        if (!this.has_key()) set_key();
 
         if (operation_mode == Cipher.ENCRYPT_MODE)
             data = data_management.concat_arrays(this.iv, data);
         else if(operation_mode == Cipher.DECRYPT_MODE) {
-            byte[] iv = new byte[key_length], payload = new byte[data.length - key_length];
+            byte[] iv = new byte[iv_length], payload = new byte[data.length - iv_length];
             data_management.split_array(data, iv, payload);
 
             data = payload;

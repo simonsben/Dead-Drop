@@ -21,21 +21,7 @@ public class bpcs extends technique {
     public static byte threshold = 8;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static naive naive_encoder = new naive();
-    private encrypter encrypt_manager;
     public HashMap<image, info_set> image_cache = new HashMap<>();
-
-    public bpcs() {
-        encrypt_manager = new encrypter();
-    }
-
-    public bpcs(String plaintext) {
-        this();
-        set_encryption_key(plaintext);
-    }
-
-    public void set_encryption_key(String plaintext) {
-        encrypt_manager.add_key(plaintext);
-    }
 
     public void analyze_image(image img) {
         if (image_cache.containsKey(img)) return;
