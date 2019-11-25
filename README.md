@@ -24,7 +24,7 @@ Writing software to embed data in one or multiple images
 
 First byte of header uses the bottom bit (LSB) for encoding type, the second LSB for technique, and the top 5 bits for encoding signature.
 The signature should inform the program whether an image contains encoded information.
-The probability of having all 5 bits match the assigned signature would be 1/2^5 or ~3%.
+The probability of having all 6 bits match the assigned signature would be 1/2^6 or ~1.6% (assuming pixels are uniform).
 Once the header format/encoding types are more developed more bits may be allocated to the signature to reduce the probability of error.
 
 ## Resources

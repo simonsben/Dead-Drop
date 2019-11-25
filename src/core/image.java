@@ -9,8 +9,9 @@ import java.nio.file.Paths;
 
 public class image {
     public BufferedImage image;
-    public int data_capacity, data_size, encoding_id, num_channels;
-    short image_index;
+    public int data_capacity, data_size, num_channels;
+    short encoding_id;
+    byte image_index;
     public byte encode_mode = -1;
     Path filename;
 

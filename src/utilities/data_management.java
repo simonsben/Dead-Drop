@@ -27,6 +27,15 @@ public class data_management {
         }
     }
 
+    public static byte[] get_sub_array(byte[] array, int start, int length) {
+        byte[] sub_array = new byte[length];
+
+        for (int index = start; index < start + length; index++)
+            sub_array[index - start] = array[index];
+
+        return sub_array;
+    }
+
     public static byte[] get_array(short value) {
         return ByteBuffer.allocate(2).putShort(value).array();
     }
