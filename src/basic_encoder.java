@@ -20,7 +20,7 @@ public class basic_encoder extends image_encoder {
 
         base_image.encode_mode = 1;
         base_image.data_size = data_length;
-        return header.generate_mode_one(base_image);
+        return header.generate_mode_one(base_image, tech);
     }
 
     public void encode_data(byte[] data) {
@@ -28,10 +28,12 @@ public class basic_encoder extends image_encoder {
 
         int data_length = tech.embed_data(base_image, data, this.header_length);     // Embed data
         tech.embed_data(base_image, get_header(data_length));                        // Embed header
-        System.out.printf("%d bytes encoded.\n", data_length);
     }
 
     public byte[] decode_data() {
+        if (base_image.encode_mode == -1)
+            throw new IllegalArgumentException("Provided file does not have data encoded in it.");
+
         return tech.recover_data(base_image, base_image.data_size, this.header_length);   // Recover data
     }
 }

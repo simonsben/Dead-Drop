@@ -46,4 +46,5 @@ public abstract class image_encoder {
 
     public abstract byte[] get_header(int data_length);
     public abstract void encode_data(byte[] data);
+    public abstract byte[] decode_data();
 }
