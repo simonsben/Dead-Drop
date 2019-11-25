@@ -142,9 +142,9 @@ public class bpcs extends technique {
                         else if (first) {                                               // Check for offset on first
                             first = false;
                             offset += (offset == 0)? 0 : block_capacity;
-                            byte_offset = insert_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                            byte_offset = insert_data(sub_image, data, data_subset, offset, byte_offset, plane, channel);
                         } else
-                            byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane);
+                            byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane, channel);
 
                         if (byte_offset >= data.length) return data.length;
                     }
@@ -159,14 +159,14 @@ public class bpcs extends technique {
         return img.image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
     }
 
-    int insert_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane) {
+    int insert_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane, int channel) {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
         System.arraycopy(data, byte_offset, data_subset, 0, data_size);                 // Copy data
         byte_offset += data_size;                                                               // Increment data offset
 
-        naive_encoder.embed_data(sub_image, data_subset, image_offset, bit_plane);              // Encode data
+        naive_encoder.embed_data(sub_image, data_subset, image_offset, bit_plane, channel);              // Encode data
         return byte_offset;
     }
 
@@ -196,9 +196,9 @@ public class bpcs extends technique {
                             first = false;
                             offset += (offset == 0)? 0 : block_capacity;
 
-                            byte_offset = extract_data(sub_image, data, data_subset, offset, byte_offset, plane);
+                            byte_offset = extract_data(sub_image, data, data_subset, offset, byte_offset, plane, channel);
                         } else
-                            byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane);
+                            byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane, channel);
 
                         if (byte_offset >= data.length) {
                             if (!(offset <= 1 && data.length < block_capacity))
@@ -216,11 +216,11 @@ public class bpcs extends technique {
         return data;
     }
 
-    int extract_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane) {
+    int extract_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane, int channel) {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
-        naive_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane);
+        naive_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane, channel);
 
         System.arraycopy(data_subset, 0, data, byte_offset, data_size);                 // Copy data
         byte_offset += data_size;                                                              // Increment data offset

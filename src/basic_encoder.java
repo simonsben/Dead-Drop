@@ -28,13 +28,10 @@ public class basic_encoder extends image_encoder {
 
         int data_length = tech.embed_data(base_image, data, this.header_length);     // Embed data
         tech.embed_data(base_image, get_header(data_length));                        // Embed header
-        System.out.printf("Encoded with length %d\n", data_length);
-
-        System.out.println("Data encoded.");
+        System.out.printf("%d bytes encoded.\n", data_length);
     }
 
     public byte[] decode_data() {
-        System.out.printf("Decode with data length %d\n", base_image.data_size);
         return tech.recover_data(base_image, base_image.data_size, this.header_length);   // Recover data
     }
 }

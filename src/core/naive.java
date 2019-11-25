@@ -11,15 +11,19 @@ public class naive extends technique {
     }
 
     public int embed_data(image img, byte[] data, int offset) {
-        return embed_data(img, data, offset, 0);
+        return embed_data(img, data, offset, 0, -1);
     }
 
-    public int embed_data(image img, byte[] data, int offset, int bit_plane) {
+    public int embed_data(image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();
 
         int num_channels = image_raster.getNumBands();
         int height = image_raster.getHeight(), width = image_raster.getWidth();
         int byte_index = 0, bit_index = 0, source = data[0];
+        int channel_start = (target_channel == -1)? 0 : target_channel,
+                channel_end = (target_channel == -1)? num_channels : target_channel + 1,
+                channel_width = channel_end - channel_start;
+
 
         int[] target_image = new int[num_channels];
         boolean initial_load = true;
@@ -27,16 +31,15 @@ public class naive extends technique {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 if (initial_load) {
-                    x = (offset * 8 / num_channels) / width;
-                    y = (offset * 8 / num_channels) % width;
+                    x = (byte_offset * 8 / channel_width) / height;
+                    y = (byte_offset * 8 / channel_width) % height;
                 }
 
                 image_raster.getPixel(x, y, target_image);          // Get pixel value
-                // Insert hidden data into each channel
-                for (int channel=0;channel<num_channels;channel++) {
+                for (int channel=channel_start;channel<channel_end;channel++) {
                     if (initial_load) {
-                        channel = (offset * 8) % num_channels;
                         initial_load = false;
+                        channel = (byte_offset * 8) % channel_width;
                     }
 
                     target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index, bit_plane);
@@ -66,15 +69,19 @@ public class naive extends technique {
     }
 
     public byte[] recover_data(image img, byte[] data, int offset) {
-        return recover_data(img, data, offset, 0);
+        return recover_data(img, data, offset, 0, -1);
     }
 
-    public byte[] recover_data(image img, byte[] data, int offset, int bit_plane) {
+    public byte[] recover_data(image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();            // Get core.image raster
 
         int num_channels = image_raster.getNumBands();              // Get number of channels in core.image
         int height = image_raster.getHeight(), width = image_raster.getWidth();   // Get height and width of core.image
         int byte_index = 0, bit_index = 0, current_byte = 0;        // Allocate indexes
+
+        int channel_start = (target_channel == -1)? 0 : target_channel,
+                channel_end = (target_channel == -1)? num_channels : target_channel + 1,
+                channel_width = channel_end - channel_start;
 
         int[] target_pixel = new int[num_channels];                 // Allocate byte array to extract core.image data
         boolean initial_load = true;                                // Set initial loop to true
@@ -82,17 +89,15 @@ public class naive extends technique {
         for (int x = 0; x < width; x++) {         // For each row
             for (int y = 0; y < height; y++) {    // For each column
                 if (initial_load) {         // Set offset before starting
-                    x = (offset * 8 / num_channels) / width;
-                    y = (offset * 8 / num_channels) % width;
+                    x = (byte_offset * 8 / channel_width) / height;
+                    y = (byte_offset * 8 / channel_width) % height;
                 }
 
                 image_raster.getPixel(x, y, target_pixel);  // Get pixel value
-
-                // Insert hidden data into each channel
-                for (int channel=0;channel<num_channels;channel++) {
+                for (int channel = channel_start; channel < channel_end; channel++) {
                     if (initial_load) {
-                        channel = (offset * 8) % num_channels;
                         initial_load = false;
+                        channel = (target_channel == -1)? (byte_offset * 8) % channel_width : channel_start;
                     }
 
                     current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_plane, bit_index);   // Get pixel

@@ -22,7 +22,7 @@ public class header {
     // Generate header for encoding mode 1, basic
     public static byte[] generate_mode_one(image img) {
         byte[] header = new byte[5];
-        header[0] = (byte) (signature | img.encode_mode);   // Add signature and encoding mode
+        header[0] = (byte) (signature | 1);   // Add signature and encoding mode
         System.arraycopy(get_array(img.data_size), 0, header, 1, 4);    // Add data length
 
         return header;
@@ -35,5 +35,6 @@ public class header {
         // Get data size
         byte[] tmp = tech.recover_data(img, 4, 1);
         img.data_size = ByteBuffer.wrap(tmp).getInt();
+        System.out.printf("Decoded header with data length %d\n", img.data_size);
     }
 }

@@ -30,7 +30,7 @@ public abstract class image_encoder {
     public void analyze_image() {
         for (image img : image_set) {
              tech.analyze_image(img);
-            this.data_capacity += img.data_capacity;
+             this.data_capacity += img.data_capacity;
         }
     }
 
