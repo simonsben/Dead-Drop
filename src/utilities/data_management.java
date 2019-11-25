@@ -21,8 +21,10 @@ public class data_management {
     }
 
     public static void offload_differences(byte[][][] counts, int x, int y, int difference) {
-        for (int bit=0;bit<8;bit++)
-            counts[bit][x][y] += low_level.get_bit(difference, bit) > 0? 1 : 0;
+        for (int bit=0;bit<8;bit++) {
+            if (counts[bit][x][y] < Byte.MAX_VALUE)
+                counts[bit][x][y] += low_level.get_bit(difference, bit) > 0? 1 : 0;
+        }
     }
 
     public static byte[] get_array(short value) {

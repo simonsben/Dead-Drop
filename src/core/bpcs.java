@@ -18,7 +18,7 @@ public class bpcs extends technique {
         }
     }
 
-    public static byte threshold = 8;
+    public static byte threshold = 10;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static naive naive_encoder = new naive();
     private encrypter encrypt_manager;
@@ -75,8 +75,9 @@ public class bpcs extends technique {
     public byte[][][] count_edges(Raster image, int channel) {
         int width = image.getWidth(), height = image.getHeight(), num_channels = image.getNumBands();
         int x_block, y_block, x_index, difference;
-        byte[][][] edge_counts = new byte[8][width][height];
+        byte[][][] edge_counts = new byte[8][width / block_size][height / block_size];
         int[] primary_row = new int[width * num_channels], secondary_row = new int[width * num_channels], tmp;
+        boolean x_edge, y_edge;
 
         if (channel >= num_channels)
             throw new IllegalArgumentException("Selected channel must exist.");
@@ -93,24 +94,21 @@ public class bpcs extends technique {
                 x_block = x / block_size;
                 x_index = x * num_channels + channel;
 
-                if (x % block_size >= num_channels - 1)
-                    continue;
-                // X primary
-                difference = primary_row[x_index] ^ primary_row[x_index + num_channels];
-                data_management.offload_differences(edge_counts, x_block, y_block, difference);
+                if ((x + 1) % block_size != 0) {    // If x is not on the edge of a block
+                    // X primary
+                    difference = primary_row[x_index] ^ primary_row[x_index + num_channels];
+                    data_management.offload_differences(edge_counts, x_block, y_block, difference);
 
-                // X secondary
-                difference = secondary_row[x_index] ^ secondary_row[x_index + num_channels];
-                data_management.offload_differences(edge_counts, x_block, (y + 1) / block_size, difference);
+                    // X secondary
+                    difference = secondary_row[x_index] ^ secondary_row[x_index + num_channels];
+                    data_management.offload_differences(edge_counts, x_block, (y + 1) / block_size, difference);
+                }
 
-                if (y % block_size >= num_channels - 1)
-                    continue;
+                if ((y + 1) % block_size != 0) {    // If y is not on the edge of a block
+                    // Y primary
+                    difference = primary_row[x_index] ^ secondary_row[x_index];
+                    data_management.offload_differences(edge_counts, x_block, y_block, difference);
 
-                // Y primary
-                difference = primary_row[x_index] ^ secondary_row[x_index];
-                data_management.offload_differences(edge_counts, x_block, y_block, difference);
-
-                if (y + 1 == height) {
                     difference = primary_row[x_index + num_channels] ^ secondary_row[x_index + num_channels];
                     data_management.offload_differences(edge_counts, (x + 1) / block_size, y_block, difference);
                 }
@@ -133,7 +131,8 @@ public class bpcs extends technique {
         byte[][][][] edge_counts = image_info.edge_counts;
         boolean first = true;
 
-        int x_blocks = edge_counts[0][0].length / block_size, y_blocks = edge_counts[0][0][0].length / block_size;
+        int x_blocks = edge_counts[0][0].length, y_blocks = edge_counts[0][0][0].length;
+        System.out.printf("block boundaries %d %d\n", x_blocks, y_blocks);
 
         for (int channel=0;channel<img.num_channels;channel++) {                    // For each channel
             for (int x_index=0;x_index<x_blocks;x_index++){            // For each block on x axis
@@ -161,6 +160,7 @@ public class bpcs extends technique {
     }
 
     BufferedImage get_sub_image(image img, int x_index, int y_index) {
+//        System.out.printf("%d\n", y_index * block_size);
         return img.image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
     }
 
@@ -185,7 +185,7 @@ public class bpcs extends technique {
         byte[][][][] edge_counts = image_info.edge_counts;
         boolean first = true;
 
-        int x_blocks = edge_counts[0][0].length / block_size, y_blocks = edge_counts[0][0][0].length / block_size;
+        int x_blocks = edge_counts[0][0].length, y_blocks = edge_counts[0][0][0].length;
 
         for (int channel=0;channel<img.num_channels;channel++) {                    // For each channel
             for (int x_index=0;x_index<x_blocks;x_index++){            // For each block on x axis
