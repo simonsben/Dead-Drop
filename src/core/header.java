@@ -53,8 +53,8 @@ public class header {
         if (tech instanceof bpcs) header[0] = (byte) (header[0] | 2);   // If technique 1, encode in header
 
         System.arraycopy(get_array(img.data_size), 0, header, 1, 4);    // Add data length
-        header[6] = img.image_index;                                                          // Add image index
-        System.arraycopy(get_array(img.encoding_id), 0, header, 7, 2);  // Add encoding index
+        header[5] = img.image_index;                                                          // Add image index
+        System.arraycopy(get_array(img.encoding_id), 0, header, 6, 2);  // Add encoding index
 
         return header;
     }
@@ -67,7 +67,7 @@ public class header {
 
         // Get data size
         img.data_size = ByteBuffer.wrap(get_sub_array(raw_header, 0, 4)).getInt();
-        img.image_index = raw_header[5];
-        img.encoding_id = ByteBuffer.wrap(get_sub_array(raw_header, 6, 2)).getShort();
+        img.image_index = raw_header[4];
+        img.encoding_id = ByteBuffer.wrap(get_sub_array(raw_header, 5, 2)).getShort();
     }
 }

@@ -5,6 +5,7 @@ import core.technique;
 import utilities.encrypter;
 
 import java.security.InvalidParameterException;
+import java.util.function.DoubleToIntFunction;
 
 public abstract class image_encoder {
     image[] image_set;
@@ -68,4 +69,17 @@ public abstract class image_encoder {
 
     public abstract void encode_data(byte[] data);
     public abstract byte[] decode_data();
+
+    @Override
+    public String toString() {
+        StringBuilder output = new StringBuilder();
+        output.append("Advanced encoder with images:\n");
+
+        for (image img : image_set) {
+            output.append(img);
+            output.append('\n');
+        }
+
+        return output.toString();
+    }
 }

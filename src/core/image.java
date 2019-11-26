@@ -10,9 +10,8 @@ import java.nio.file.Paths;
 public class image {
     public BufferedImage image;
     public int data_capacity, data_size, num_channels;
-    short encoding_id;
-    byte image_index;
-    public byte encode_mode = -1;
+    public short encoding_id;
+    public byte image_index, encode_mode = -1;
     Path filename;
 
     public image(String filename, technique tech) {
@@ -43,5 +42,10 @@ public class image {
         extension = extension == null ? "png" : extension;
 
         save_image(filename, extension);
+    }
+
+    @Override
+    public String toString() {
+        return image_index + " of " + encoding_id + " using " + data_size / 1024 + "K of " + data_capacity / 1024 + "K";
     }
 }
