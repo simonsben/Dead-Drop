@@ -12,6 +12,7 @@ public class image {
     public int data_capacity, data_size, num_channels;
     public short encoding_id;
     public byte image_index, encode_mode = -1;
+    public boolean was_used = false;
     Path filename;
 
     public image(String filename, technique tech) {

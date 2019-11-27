@@ -13,6 +13,8 @@ public class advanced_encoder extends image_encoder {
         super(filenames, technique_name);
         this.header_length = 8;
         encoding_id = (short) (new Random()).nextInt(Short.MAX_VALUE + 1);
+
+        System.out.printf("Initialized encoder with capacity %dK\n", data_capacity / 1024);
     }
 
     public advanced_encoder(String[] filenames) {
@@ -20,7 +22,7 @@ public class advanced_encoder extends image_encoder {
     }
 
     byte[] get_header(image img, int data_length) {
-        if (img.data_capacity < data_length + header_length)
+        if (img.data_capacity < data_length)
             throw new IllegalArgumentException("Target image doesn't have the capacity to embed the given data");
 
         img.encode_mode = 1;
@@ -43,6 +45,11 @@ public class advanced_encoder extends image_encoder {
             data_subset = get_sub_array(data, byte_offset, data_size);          // Get data subset
             byte_offset += data_size;
 
+            if (data_size == 0)
+                break;
+
+            img.was_used = true;
+            System.out.printf("requesting %dK\n", data_size / 1024);
             int data_length = tech.embed_data(img, data_subset, header_length);     // Embed data
             tech.embed_data(img, get_header(img, data_length));                     // Embed header
         }
@@ -55,8 +62,10 @@ public class advanced_encoder extends image_encoder {
             if (img.encode_mode == -1)
                 throw new IllegalArgumentException("Provided file does not have data encoded in it.");
 
-            image_data = tech.recover_data(img, img.data_size, header_length);
-            data = concat_arrays(data, image_data);
+            if (img.was_used) {
+                image_data = tech.recover_data(img, img.data_size, header_length);
+                data = concat_arrays(data, image_data);
+            }
         }
 
         return data;

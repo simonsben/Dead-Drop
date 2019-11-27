@@ -116,6 +116,7 @@ public class naive extends technique {
                 }
             }
         }
-        return null;
+        return data;
+//        throw new IllegalArgumentException("Provided data length did not terminate data collection.");
     }
 }

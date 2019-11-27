@@ -21,6 +21,7 @@ public class header {
             throw new IllegalCallerException("Encoder technique not equal to encoded format.");
 
         byte mode = (byte) low_level.get_bit(raw, 0);
+        img.was_used = true;
 
         if (mode == 0) decode_mode_one(img, tech);
         if (mode == 1) decode_mode_two(img, tech);

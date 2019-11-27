@@ -46,7 +46,7 @@ public abstract class image_encoder {
 
             img.data_capacity -= header_length;     // Subtract header length from image capacity
             if (will_encrypt)                       // If encrypting remove IV length
-                this.data_capacity -= encrypter.iv_length * image_set.length;
+                img.data_capacity -= encrypter.iv_length;
 
             this.data_capacity += img.data_capacity;
         }
@@ -58,8 +58,10 @@ public abstract class image_encoder {
     }
 
     public void save_images() {
-        for (image target_image : image_set)
-            target_image.save_image();
+        for (image target_image : image_set) {
+            if (target_image.was_used)
+                target_image.save_image();
+        }
     }
 
     public void set_encryption_key(String plaintext) {

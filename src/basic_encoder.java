@@ -15,7 +15,7 @@ public class basic_encoder extends image_encoder {
     }
 
     public byte[] get_header(int data_length) {
-        if (base_image.data_capacity < data_length + header_length)
+        if (base_image.data_capacity < data_length)
             return null;
 
         base_image.encode_mode = 0;
