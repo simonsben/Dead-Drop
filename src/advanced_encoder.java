@@ -28,7 +28,7 @@ public class advanced_encoder extends image_encoder {
         img.encode_mode = 1;
         img.data_size = data_length;
         img.encoding_id = this.encoding_id;
-        return header.generate_mode_two(img, tech);
+        return header.generate_advanced(img, tech);
     }
 
     public void encode_data(byte[] data) {

@@ -13,33 +13,37 @@ public class header {
     public static void decode_header(image img, technique tech) {
         byte raw = tech.recover_data(img, 1)[0];     // Get first byte
         int saved_technique = low_level.extract_bit(raw, 0, 1, 0);
+        System.out.printf("Header %02X\n", raw);
+
         if ((raw & signature_mask) != signature) {  // Check if encoder signature is present
             System.out.println("Skipping image, signature not present.");
             return;
         }
-        if ((saved_technique == 0 && (tech instanceof bpcs)) || (saved_technique == 1 && (tech instanceof naive)))
+        if ((saved_technique == 0 && (tech instanceof BPCS)) || (saved_technique == 1 && (tech instanceof Naive)))
             throw new IllegalCallerException("Encoder technique not equal to encoded format.");
 
         byte mode = (byte) low_level.get_bit(raw, 0);
         img.was_used = true;
+        System.out.printf("Found mode %d %02X\n", mode, raw);
 
-        if (mode == 0) decode_mode_one(img, tech);
-        if (mode == 1) decode_mode_two(img, tech);
+        if (mode == 0) decode_basic(img, tech);
+        if (mode == 1) decode_advanced(img, tech);
     }
 
     // Generate header for encoding mode 1, basic
-    public static byte[] generate_mode_one(image img, technique tech) {
+    public static byte[] generate_basic(image img, technique tech) {
         byte[] header = new byte[5];
 
-        header[0] = (byte) signature;                                   // Add signature and encoding mode (0)
-        if (tech instanceof bpcs) header[0] = (byte) (header[0] | 2);   // If technique 1, mark in header
+        header[0] = signature;                                          // Add signature and encoding mode (0)
+        if (tech instanceof BPCS) header[0] = (byte) (header[0] | 2);   // If technique 1, mark in header
         System.arraycopy(get_array(img.data_size), 0, header, 1, 4);    // Add data length
 
+        System.out.printf("Header %02X\n", header[0]);
         return header;
     }
 
     // Decode header when using encoding mode 1, basic
-    public static void decode_mode_one(image img, technique tech) {
+    public static void decode_basic(image img, technique tech) {
         img.encode_mode = 0;
 
         // Get data size
@@ -48,10 +52,10 @@ public class header {
     }
 
     // Generate header for encoding mode 1, advanced
-    public static byte[] generate_mode_two(image img, technique tech) {
+    public static byte[] generate_advanced(image img, technique tech) {
         byte[] header = new byte[8];
         header[0] = (byte) (signature | 1);                             // Add signature and encoding mode
-        if (tech instanceof bpcs) header[0] = (byte) (header[0] | 2);   // If technique 1, encode in header
+        if (tech instanceof BPCS) header[0] = (byte) (header[0] | 2);   // If technique 1, encode in header
 
         System.arraycopy(get_array(img.data_size), 0, header, 1, 4);    // Add data length
         header[5] = img.image_index;                                                          // Add image index
@@ -61,7 +65,7 @@ public class header {
     }
 
     // Decode header when using encoding mode 2, advanced
-    public static void decode_mode_two(image img, technique tech) {
+    public static void decode_advanced(image img, technique tech) {
         img.encode_mode = 1;
 
         byte[] raw_header = tech.recover_data(img, 7, 1);

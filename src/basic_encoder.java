@@ -20,7 +20,7 @@ public class basic_encoder extends image_encoder {
 
         base_image.encode_mode = 0;
         base_image.data_size = data_length;
-        return header.generate_mode_one(base_image, tech);
+        return header.generate_basic(base_image, tech);
     }
 
     public void encode_data(byte[] data) {

@@ -13,7 +13,7 @@ public class image {
     public short encoding_id;
     public byte image_index, encode_mode = -1;
     public boolean was_used = false;
-    Path filename;
+    public Path filename;
 
     public image(String filename, technique tech) {
         this.filename = Paths.get(filename);

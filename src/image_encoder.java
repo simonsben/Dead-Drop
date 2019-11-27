@@ -1,16 +1,15 @@
 import core.image;
-import core.naive;
-import core.bpcs;
+import core.Naive;
+import core.BPCS;
 import core.technique;
 import utilities.encrypter;
 
 import java.security.InvalidParameterException;
-import java.util.function.DoubleToIntFunction;
 
 public abstract class image_encoder {
     image[] image_set;
     int header_length, data_capacity;
-    technique tech = new naive();
+    technique tech = new Naive();
     boolean will_encrypt = false, assigned_key = false;
 
 
@@ -30,10 +29,10 @@ public abstract class image_encoder {
             System.out.println("----- WARNING: Discarding previously set encryption key. -----");
 
         if (technique_name.equals("naive")) {
-            tech = new naive();
+            tech = new Naive();
             will_encrypt = false;
         } else if (technique_name.equals("bpcs")) {
-            tech = new bpcs();
+            tech = new BPCS();
             will_encrypt = true;
         }
         else throw new InvalidParameterException("Encoding type not supported.");

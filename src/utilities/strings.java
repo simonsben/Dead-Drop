@@ -14,7 +14,7 @@ public class strings {
 
     // Gets the file type extension (ex. file.txt -> txt)
     public static String get_extension(String filename) {
-        return execute_regex("(?<=\\.)\\w+", filename);
+        return execute_regex("(?<=\\.)\\w+$", filename);
     }
 
     // Removes extension from filename (ex. file.txt -> file)
