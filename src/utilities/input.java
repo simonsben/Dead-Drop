@@ -8,9 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.util.Scanner;
 
 
 public class input {
+    private static Scanner input_scanner;
     // Import file as byte stream
     public static byte[] load_file(Path file_path) {
         FileInputStream data_stream = null;
@@ -60,5 +62,11 @@ public class input {
 
     public static BufferedImage load_image(Path file_path) {
         return load_image(file_path.toString());
+    }
+
+    public static short get_input() {
+        if (input_scanner == null)
+            input_scanner = new Scanner(System.in);
+        return input_scanner.nextShort();
     }
 }

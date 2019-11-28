@@ -18,7 +18,7 @@ public class BPCS extends technique {
         }
     }
 
-    public static byte threshold = 8;
+    public static byte threshold = 15;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static Naive naive_encoder = new Naive();
     public HashMap<image, info_set> image_cache = new HashMap<>();
@@ -41,13 +41,13 @@ public class BPCS extends technique {
         image_cache.put(img, new info_set(image_edge_counts, channel_capacities));
     }
 
-    public static int channel_capacity(byte[][][] edge_counts) {
+    public int channel_capacity(byte[][][] edge_counts) {
         int channel_capacity = 0;
 
         for (int plane=0;plane<8;plane++) {
             for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
                 for (int y_index=0;y_index<edge_counts[0][0].length;y_index++)
-                    channel_capacity += edge_counts[plane][x_index][y_index];
+                    channel_capacity += (edge_counts[plane][x_index][y_index] > threshold)? block_capacity : 0;
             }
         }
 

@@ -1,5 +1,8 @@
+import core.BPCS;
 import core.header;
 import core.image;
+import core.technique;
+import utilities.encrypter;
 
 import java.util.Random;
 
@@ -21,7 +24,14 @@ public class advanced_encoder extends image_encoder {
         this(filenames, "naive");
     }
 
+    public advanced_encoder(image[] images, technique tech, short _encoding_id) {
+        super(images, tech);
+        header_length = 8;
+        encoding_id = _encoding_id;
+    }
+
     byte[] get_header(image img, int data_length) {
+        System.out.printf("Trying to encode %d into %d\n", data_length, img.data_capacity);
         if (img.data_capacity < data_length)
             throw new IllegalArgumentException("Target image doesn't have the capacity to embed the given data");
 
@@ -41,9 +51,12 @@ public class advanced_encoder extends image_encoder {
             img = image_set[index];
             img.image_index = index;
 
-            data_size = Math.min(img.data_capacity, data.length - byte_offset); // Get data subset length
+            int modifier = will_encrypt? encrypter.iv_length : 0;
+            data_size = Math.min(img.data_capacity - modifier, data.length - byte_offset - modifier); // Get data subset length
             data_subset = get_sub_array(data, byte_offset, data_size);          // Get data subset
             byte_offset += data_size;
+
+            System.out.printf("Encoding %s with %dK of %dK data\n", img.filename.getFileName(), data_size, img.data_capacity);
 
             if (data_size == 0)
                 break;

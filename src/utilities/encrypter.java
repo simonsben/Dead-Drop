@@ -47,8 +47,8 @@ public class encrypter {
     void generate_iv() {
         SecureRandom generator = new SecureRandom();
 
-        this.iv = new byte[iv_length];
-        generator.nextBytes(this.iv);
+        iv = new byte[iv_length];
+        generator.nextBytes(iv);
     }
 
     // Run encrypt/decrypt operation
@@ -56,13 +56,13 @@ public class encrypter {
         if (!this.has_key()) set_key();
 
         if (operation_mode == Cipher.ENCRYPT_MODE)
-            data = data_management.concat_arrays(this.iv, data);
+            data = data_management.concat_arrays(iv, data);
         else if(operation_mode == Cipher.DECRYPT_MODE) {
-            byte[] iv = new byte[iv_length], payload = new byte[data.length - iv_length];
-            data_management.split_array(data, iv, payload);
+            byte[] _iv = new byte[iv_length], payload = new byte[data.length - iv_length];
+            data_management.split_array(data, _iv, payload);
 
             data = payload;
-            this.iv = iv;
+            iv = _iv;
         }
 
         Cipher cipher;

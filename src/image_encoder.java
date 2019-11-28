@@ -16,11 +16,17 @@ public abstract class image_encoder {
     public image_encoder(String[] filenames, String technique_name) {
         set_technique(technique_name);
 
-        image[] image_set = new image[filenames.length];
+        image_set = new image[filenames.length];
         for (int index=0;index<filenames.length;index++)
             image_set[index] = new image(filenames[index], tech);
 
-        this.image_set = image_set;
+        analyze_images();
+    }
+
+    public image_encoder(image[] images, technique _tech) {
+        image_set = images;
+        tech = _tech;
+
         analyze_images();
     }
 
@@ -44,8 +50,8 @@ public abstract class image_encoder {
              tech.analyze_image(img);
 
             img.data_capacity -= header_length;     // Subtract header length from image capacity
-            if (will_encrypt)                       // If encrypting remove IV length
-                img.data_capacity -= encrypter.iv_length;
+//            if (will_encrypt)                       // If encrypting remove IV length
+//                img.data_capacity -= encrypter.iv_length;
 
             this.data_capacity += img.data_capacity;
         }

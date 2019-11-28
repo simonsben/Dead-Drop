@@ -11,7 +11,7 @@ public class image {
     public BufferedImage image;
     public int data_capacity, data_size, num_channels;
     public short encoding_id;
-    public byte image_index, encode_mode = -1;
+    public byte image_index, encode_mode = -1, encode_tech = -1;
     public boolean was_used = false;
     public Path filename;
 
@@ -47,6 +47,6 @@ public class image {
 
     @Override
     public String toString() {
-        return image_index + " of " + encoding_id + " using " + data_size / 1024 + "K of " + data_capacity / 1024 + "K";
+        return image_index + " of set " + encoding_id + " using " + data_size / 1024 + "K of " + data_capacity / 1024 + "K";
     }
 }

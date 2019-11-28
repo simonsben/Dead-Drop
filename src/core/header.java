@@ -11,7 +11,7 @@ public class header {
 
     public static void decode_header(image img, technique tech) {
         byte raw = tech.recover_data(img, 1)[0];     // Get first byte
-        int saved_technique = low_level.extract_bit(raw, 0, 1, 0);
+        byte saved_technique = (byte) low_level.extract_bit(raw, 0, 1, 0);
 
         if ((raw & signature_mask) != signature)              // Check if encoder signature is present
             return;
@@ -20,6 +20,7 @@ public class header {
 
         byte mode = (byte) low_level.get_bit(raw, 0);
         img.was_used = true;
+        img.encode_tech = saved_technique;
 
         if (mode == 0) decode_basic(img, tech);
         if (mode == 1) decode_advanced(img, tech);

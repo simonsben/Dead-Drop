@@ -3,11 +3,12 @@ package core;
 import java.util.ArrayList;
 
 public class Potential {
-    public int index, encoding_id;
+    public int index;
+    public short encoding_id;
     public boolean is_advanced;
-    ArrayList<image> image_set;
+    public ArrayList<image> image_set;
 
-    public Potential(int _index, boolean _is_advanced, image img, int _encoding_id) {
+    public Potential(int _index, boolean _is_advanced, image img, short _encoding_id) {
         index = _index;
         is_advanced = _is_advanced;
         encoding_id = _encoding_id;
@@ -16,7 +17,7 @@ public class Potential {
         add(img);
     }
     public Potential(int _index, boolean _is_advanced, image img) {
-        this(_index, _is_advanced, img, -1);
+        this(_index, _is_advanced, img, (short) -1);
     }
 
 
@@ -43,6 +44,7 @@ public class Potential {
         listing.append(index);
         listing.append(": ");
         listing.append(is_advanced? "advanced " : "basic ");
+        listing.append(image_set.get(0).encode_tech == 0? "naive " : "bpcs ");
         if (is_advanced)
             listing.append(encoding_id);
 
