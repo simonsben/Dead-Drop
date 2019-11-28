@@ -28,6 +28,7 @@ public class basic_encoder extends image_encoder {
 
         int data_length = tech.embed_data(base_image, data, this.header_length);     // Embed data
         tech.embed_data(base_image, get_header(data_length));                        // Embed header
+        base_image.was_used = true;
     }
 
     public byte[] decode_data() {

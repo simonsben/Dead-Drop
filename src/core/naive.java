@@ -40,8 +40,6 @@ public class Naive extends technique {
                     if (initial_load) {
                         initial_load = false;
                         channel = (byte_offset * 8) % channel_width;
-
-                        System.out.printf("Starting at %d %d %d\n", x, y, channel);
                     }
 
                     target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index, bit_plane);

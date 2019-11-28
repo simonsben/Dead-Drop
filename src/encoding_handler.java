@@ -22,19 +22,18 @@ public class encoding_handler {
             System.out.println(file);
 
         encoding_handler handler = new encoding_handler();
-        Potential[] potentials = handler.check_candidates(files);
+        ArrayList<Potential> potentials = handler.check_candidates(files);
 
         for (Potential potential : potentials)
             System.out.println(potential);
     }
 
-    public Potential[] check_candidates(File[] candidates) {
+    public ArrayList<Potential> check_candidates(File[] candidates) {
         ArrayList<Potential> potentials = new ArrayList<>();
         int index = 0;
 
         for (File filename : candidates) {
             image img = new image(filename.toString(), naive);
-            System.out.printf("Encode mode %d\n", img.encode_mode);
 
             if (img.encode_mode == 0) {
                 potentials.add(new Potential(++index, false, img));
@@ -50,7 +49,7 @@ public class encoding_handler {
             }
         }
 
-        return (Potential[]) potentials.toArray();
+        return potentials;
     }
 
 //    public String[] check_candidates(String[] candidates) {

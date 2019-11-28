@@ -13,7 +13,6 @@ public class header {
     public static void decode_header(image img, technique tech) {
         byte raw = tech.recover_data(img, 1)[0];     // Get first byte
         int saved_technique = low_level.extract_bit(raw, 0, 1, 0);
-        System.out.printf("Header %02X\n", raw);
 
         if ((raw & signature_mask) != signature) {  // Check if encoder signature is present
             System.out.println("Skipping image, signature not present.");
@@ -24,7 +23,6 @@ public class header {
 
         byte mode = (byte) low_level.get_bit(raw, 0);
         img.was_used = true;
-        System.out.printf("Found mode %d %02X\n", mode, raw);
 
         if (mode == 0) decode_basic(img, tech);
         if (mode == 1) decode_advanced(img, tech);
@@ -38,7 +36,6 @@ public class header {
         if (tech instanceof BPCS) header[0] = (byte) (header[0] | 2);   // If technique 1, mark in header
         System.arraycopy(get_array(img.data_size), 0, header, 1, 4);    // Add data length
 
-        System.out.printf("Header %02X\n", header[0]);
         return header;
     }
 

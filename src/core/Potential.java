@@ -36,10 +36,10 @@ public class Potential {
     @Override
     public String toString() {
         if (!is_advanced)
-            return index + ' ' + image_set.get(0).filename.getFileName().toString();
+            return index + " " + image_set.get(0).filename.getFileName().toString();
 
         StringBuilder listing = new StringBuilder();
-        listing.append(index + " - advanced - ");
+        listing.append(index + " - advanced, " + encoding_id + " - ");
 
         for (image img : image_set) {
             listing.append(img.filename.getFileName());
