@@ -3,7 +3,6 @@ package core;
 import java.nio.ByteBuffer;
 import static utilities.data_management.get_array;
 import static utilities.data_management.get_sub_array;
-
 import utilities.low_level;
 
 public class header {
@@ -14,10 +13,8 @@ public class header {
         byte raw = tech.recover_data(img, 1)[0];     // Get first byte
         int saved_technique = low_level.extract_bit(raw, 0, 1, 0);
 
-        if ((raw & signature_mask) != signature) {  // Check if encoder signature is present
-            System.out.println("Skipping image, signature not present.");
+        if ((raw & signature_mask) != signature)              // Check if encoder signature is present
             return;
-        }
         if ((saved_technique == 0 && (tech instanceof BPCS)) || (saved_technique == 1 && (tech instanceof Naive)))
             throw new IllegalCallerException("Encoder technique not equal to encoded format.");
 

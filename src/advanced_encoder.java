@@ -48,8 +48,7 @@ public class advanced_encoder extends image_encoder {
             if (data_size == 0)
                 break;
 
-            img.was_used = true;
-            System.out.printf("requesting %dK\n", data_size / 1024);
+            img.was_used = true;                                                    // Mark image as used
             int data_length = tech.embed_data(img, data_subset, header_length);     // Embed data
             tech.embed_data(img, get_header(img, data_length));                     // Embed header
         }

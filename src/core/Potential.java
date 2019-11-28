@@ -21,29 +21,34 @@ public class Potential {
 
 
     public void add(image img) {
-        if (is_advanced && image_set.size() > 0)
+        if (!is_advanced && image_set.size() > 0)
             throw new IllegalArgumentException("Cannot add more than one image to basic potential encoding");
         image_set.add(img);
     }
 
     @Override
     public int hashCode() {
+        System.out.printf("Computing hash for %d on %s\n", encoding_id, image_set.get(0).filename);
         if (is_advanced)
-            return Integer.hashCode(encoding_id);
+            return encoding_id;
         return image_set.get(0).hashCode();
     }
 
     @Override
     public String toString() {
-        if (!is_advanced)
-            return index + " " + image_set.get(0).filename.getFileName().toString();
+//        if (!is_advanced)
+//            return index + " " + image_set.get(0).filename.getFileName().toString();
 
         StringBuilder listing = new StringBuilder();
-        listing.append(index + " - advanced, " + encoding_id + " - ");
+        listing.append(index);
+        listing.append(": ");
+        listing.append(is_advanced? "advanced " : "basic ");
+        if (is_advanced)
+            listing.append(encoding_id);
 
         for (image img : image_set) {
-            listing.append(img.filename.getFileName());
             listing.append(' ');
+            listing.append(img.filename.getFileName());
         }
         return listing.toString();
     }

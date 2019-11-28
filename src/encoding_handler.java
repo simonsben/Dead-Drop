@@ -8,71 +8,50 @@ import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import static utilities.strings.get_extension;
 
 public class encoding_handler {
     technique naive = new Naive(), bpcs = new BPCS();
+    HashMap<Short, Potential> potentials;
 
     public static void main(String[] args) {
-        Path dir_path = Paths.get("processed");
-        File[] files = get_candidates(dir_path);
-
-        for (File file : files)
-            System.out.println(file);
-
-        encoding_handler handler = new encoding_handler();
-        ArrayList<Potential> potentials = handler.check_candidates(files);
-
-        for (Potential potential : potentials)
-            System.out.println(potential);
+        encoding_handler handler = new encoding_handler("processed");
+        System.out.println(handler);
     }
 
-    public ArrayList<Potential> check_candidates(File[] candidates) {
-        ArrayList<Potential> potentials = new ArrayList<>();
-        int index = 0;
+    public encoding_handler(String directory) {
+        Path dir_path = Paths.get(directory);
+        File[] files = get_candidates(dir_path);
+        potentials = check_candidates(files);
+    }
+
+    public HashMap<Short, Potential> check_candidates(File[] candidates) {
+//        ArrayList<Potential> potentials = new ArrayList<>();
+        HashMap<Short, Potential> potentials = new HashMap<>();
+        short index = 0;
 
         for (File filename : candidates) {
             image img = new image(filename.toString(), naive);
 
-            if (img.encode_mode == 0) {
-                potentials.add(new Potential(++index, false, img));
+            if (img.encode_mode == 0) {     // If basic
+                potentials.put(++index, new Potential(index, false, img));
                 continue;
             }
             img.load_image(bpcs);
-            if (img.encode_mode == 1) {
-                int key = img.encoding_id;
-                if (potentials.contains(key))
+            if (img.encode_mode == 1) {     // If advanced
+                short key = img.encoding_id;
+                if (potentials.containsKey(key))
                     potentials.get(key).add(img);
                 else
-                    potentials.add(new Potential(++index, true, img, key));
+                    potentials.put(key, new Potential(++index, true, img, key));
             }
         }
 
         return potentials;
     }
-
-//    public String[] check_candidates(String[] candidates) {
-//        HashMap<Integer, ArrayList<image>> advanced_map = new HashMap<>();
-//        HashMap<Integer, image> basic_map = new HashMap<>();
-//        int basic_index = 0;
-//
-//        for (String filename : candidates) {
-//            image img = new image(filename, naive);
-//            if (img.encode_mode == 0) {
-//                basic_map.put(++basic_index, img);
-//                continue;
-//            }
-//            img.load_image(bpcs);
-//            if (img.encode_mode == 1) {
-//                int key = img.encoding_id;
-//
-//                if (!advanced_map.containsKey(key))     // If key isn't present, add it
-//                    advanced_map.put(key, new ArrayList<image>());
-//                advanced_map.get(key).add(img);         // Add image to entry
-//            }
-//        }
-//    }
 
     final static FilenameFilter filter = ((dir, name) -> get_extension(name).equals("png"));
 
@@ -80,5 +59,22 @@ public class encoding_handler {
         File dir_file = directory.toFile();
 
         return dir_file.listFiles(filter);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder output = new StringBuilder();
+        output.append("Potential candidates:\n");
+
+        potentials.forEach((key, potential) -> {
+            output.append(potential);
+            output.append('\n');
+        });
+//        for (Potential potential : potentials.forEach();) {
+//            output.append(potential);
+//            output.append('\n');
+//        }
+
+        return output.toString();
     }
 }

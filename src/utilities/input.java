@@ -51,7 +51,6 @@ public class input {
         BufferedImage image;
         try {
             image = ImageIO.read(new File(filename));
-            System.out.println(filename + " loaded.");
         } catch (IOException e) {
             e.printStackTrace();
             return null;
