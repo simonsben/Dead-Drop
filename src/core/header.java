@@ -75,7 +75,7 @@ public class header {
         img.image_index = raw_header[4];
         img.encoding_id = ByteBuffer.wrap(get_sub_array(raw_header, 5, 2)).getShort();
 
-        if (img.data_size > img.data_capacity)
-            throw new IllegalArgumentException("Data size cannot exceed image capacity.");
+        if (tech instanceof BPCS && img.data_size > img.data_capacity)
+            throw new IllegalArgumentException("Data size cannot exceed image capacity.\n" + img);
     }
 }

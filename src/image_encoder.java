@@ -50,7 +50,7 @@ public abstract class image_encoder {
             tech.analyze_image(img);
             this.data_capacity += img.data_capacity;
         }
-//        System.out.printf("Initialized encoder with capacity %dK\n", data_capacity / 1024);
+        System.out.printf("Initialized encoder with capacity %dK\n", data_capacity / 1024);
     }
 
     public void has_capacity(int data_length) {

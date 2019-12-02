@@ -1,13 +1,10 @@
 package core;
 
 import utilities.data_management;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
-
-import static utilities.data_management.compute_md5;
 
 public class BPCS extends technique {
     public class info_set {

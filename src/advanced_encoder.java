@@ -1,11 +1,8 @@
-import core.BPCS;
 import core.header;
 import core.image;
 import core.technique;
 import utilities.encrypter;
-
 import java.util.Random;
-
 import static utilities.data_management.concat_arrays;
 import static utilities.data_management.get_sub_array;
 
@@ -42,7 +39,6 @@ public class advanced_encoder extends image_encoder {
 
         for (byte index = 0; index < image_set.length; index++) {
             img = image_set[index];
-            img.image_index = index;
 
 
             max_size = img.data_capacity - header_length - (will_encrypt? encrypter.key_length : 0);
@@ -54,9 +50,9 @@ public class advanced_encoder extends image_encoder {
 
             if (data_size == 0) break;
 
+            img.image_index = index;
             img.was_used = true;                                                    // Mark image as used
             int data_length = tech.embed_data(img, data_subset, header_length);     // Embed data
-//            System.out.printf("Encoded size %d\n", data_length);
             tech.embed_data(img, get_header(img, data_length), 0);                     // Embed header
         }
     }
@@ -66,7 +62,6 @@ public class advanced_encoder extends image_encoder {
 
         for (image img : image_set) {
             if (img.was_used) {
-//                System.out.printf("Decoded size %d\n", img.data_size);
                 image_data = tech.recover_data(img, img.data_size, header_length);
                 data = concat_arrays(data, image_data);
             }

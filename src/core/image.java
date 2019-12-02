@@ -45,6 +45,7 @@ public class image {
         save_image(filename, extension);
     }
 
+    // TODO cleanup
     @Override
     public String toString() {
         return image_index + " of set " + encoding_id + " using " + data_size / 1024 + "K of " + data_capacity / 1024 + "K";
