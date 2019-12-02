@@ -7,6 +7,8 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
 
+import static utilities.data_management.compute_md5;
+
 public class BPCS extends technique {
     public class info_set {
         public byte[][][][] edge_counts;
@@ -29,15 +31,13 @@ public class BPCS extends technique {
         Raster raster = img.image.getRaster();
         byte[][][][] image_edge_counts = new byte[img.num_channels][][][];
         int[] channel_capacities = new int[img.num_channels];
-        int capacity = 0;
 
         for (int channel=0;channel<img.num_channels;channel++) {
             image_edge_counts[channel] = count_edges(raster, channel);
             channel_capacities[channel] = channel_capacity(image_edge_counts[channel]);
-            capacity += channel_capacities[channel];
+            img.data_capacity += channel_capacities[channel];
         }
 
-        img.data_capacity = capacity;
         image_cache.put(img, new info_set(image_edge_counts, channel_capacities));
     }
 
@@ -47,7 +47,7 @@ public class BPCS extends technique {
         for (int plane=0;plane<8;plane++) {
             for (int x_index=0;x_index<edge_counts[0].length;x_index++) {
                 for (int y_index=0;y_index<edge_counts[0][0].length;y_index++)
-                    channel_capacity += (edge_counts[plane][x_index][y_index] > threshold)? block_capacity : 0;
+                    channel_capacity += (edge_counts[plane][x_index][y_index] >= threshold)? block_capacity : 0;
             }
         }
 
@@ -107,6 +107,8 @@ public class BPCS extends technique {
 
     public int embed_data(image img, byte[] data, int offset) {
         if (offset > 1) data = encrypt_manager.encrypt_data(data);  // Don't encrypt if its the header
+        if (data.length + offset > img.data_capacity)
+            throw new IllegalArgumentException(data.length + "B exceeds image capacity of " + img.data_capacity + "B");
         info_set image_info = image_cache.get(img);                 // Get image info from cache
 
         image sub_image = new image();
@@ -123,11 +125,11 @@ public class BPCS extends technique {
                     for (int plane=0;plane<8;plane++) {
                         if (edge_counts[channel][plane][x_index][y_index] < threshold)  // Skip block if not high-freq
                             continue;
-                        if (first && (offset -= block_capacity) > 0)                    // Skip blocks until
+                        if (first && (offset -= block_capacity) >= 0)                    // Skip blocks until
                             continue;
                         else if (first) {                                               // Check for offset on first
                             first = false;
-                            offset += (offset == 0)? 0 : block_capacity;
+                            offset += block_capacity;
                             byte_offset = insert_data(sub_image, data, data_subset, offset, byte_offset, plane, channel);
                         } else
                             byte_offset = insert_data(sub_image, data, data_subset, 0, byte_offset, plane, channel);
@@ -176,12 +178,11 @@ public class BPCS extends technique {
                     for (int plane=0;plane<8;plane++) {
                         if (edge_counts[channel][plane][x_index][y_index] < threshold)
                             continue;
-                        if (first && (offset -= block_capacity) > 0)    // Skip blocks until
+                        if (first && (offset -= block_capacity) >= 0)    // Skip blocks until
                             continue;
                         else if (first) {
                             first = false;
-                            offset += (offset == 0)? 0 : block_capacity;
-
+                            offset += block_capacity;
                             byte_offset = extract_data(sub_image, data, data_subset, offset, byte_offset, plane, channel);
                         } else
                             byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane, channel);

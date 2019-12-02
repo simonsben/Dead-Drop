@@ -3,6 +3,8 @@ package core;
 import java.nio.ByteBuffer;
 import static utilities.data_management.get_array;
 import static utilities.data_management.get_sub_array;
+import static utilities.output.print_hex;
+
 import utilities.low_level;
 
 public class header {
@@ -10,7 +12,7 @@ public class header {
     static byte signature_mask = (byte) 0xFC;
 
     public static void decode_header(image img, technique tech) {
-        byte raw = tech.recover_data(img, 1)[0];     // Get first byte
+        byte raw = tech.recover_data(img, 1, 0)[0];     // Get first byte
         byte saved_technique = (byte) low_level.extract_bit(raw, 0, 1, 0);
 
         if ((raw & signature_mask) != signature)              // Check if encoder signature is present
@@ -44,6 +46,9 @@ public class header {
         // Get data size
         byte[] tmp = tech.recover_data(img, 4, 1);
         img.data_size = ByteBuffer.wrap(tmp).getInt();
+
+        if (img.data_size > img.data_capacity)
+            throw new IllegalArgumentException("Data size cannot exceed image capacity.");
     }
 
     // Generate header for encoding mode 1, advanced
@@ -69,5 +74,8 @@ public class header {
         img.data_size = ByteBuffer.wrap(get_sub_array(raw_header, 0, 4)).getInt();
         img.image_index = raw_header[4];
         img.encoding_id = ByteBuffer.wrap(get_sub_array(raw_header, 5, 2)).getShort();
+
+        if (img.data_size > img.data_capacity)
+            throw new IllegalArgumentException("Data size cannot exceed image capacity.");
     }
 }

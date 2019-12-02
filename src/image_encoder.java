@@ -2,13 +2,13 @@ import core.image;
 import core.Naive;
 import core.BPCS;
 import core.technique;
-import utilities.encrypter;
 
 import java.security.InvalidParameterException;
 
 public abstract class image_encoder {
     image[] image_set;
-    int header_length, data_capacity;
+    static int header_length;
+    int data_capacity;
     technique tech = new Naive();
     boolean will_encrypt = false, assigned_key = false;
 
@@ -47,14 +47,10 @@ public abstract class image_encoder {
 
     public void analyze_images() {
         for (image img : image_set) {
-             tech.analyze_image(img);
-
-            img.data_capacity -= header_length;     // Subtract header length from image capacity
-//            if (will_encrypt)                       // If encrypting remove IV length
-//                img.data_capacity -= encrypter.iv_length;
-
+            tech.analyze_image(img);
             this.data_capacity += img.data_capacity;
         }
+//        System.out.printf("Initialized encoder with capacity %dK\n", data_capacity / 1024);
     }
 
     public void has_capacity(int data_length) {

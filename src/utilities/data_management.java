@@ -1,6 +1,14 @@
 package utilities;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class data_management {
     // Concatenate byte arrays
@@ -34,6 +42,25 @@ public class data_management {
             sub_array[index - start] = array[index];
 
         return sub_array;
+    }
+
+    // TODO cleanup code - from SO answer
+    public static String compute_md5(byte[] data) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        byte[] messageDigest = md.digest(data);
+
+        BigInteger no = new BigInteger(1, messageDigest);
+        String hashtext = no.toString(16);
+
+        while (hashtext.length() < 32) {
+            hashtext = "0" + hashtext;
+        }
+        return hashtext;
     }
 
     public static byte[] get_array(short value) {

@@ -1,32 +1,29 @@
 package utilities;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.security.*;
+
+import static utilities.data_management.concat_arrays;
+import static utilities.data_management.split_array;
+import static utilities.strings.get_algorithm;
 
 public class encrypter {
     private SecretKeySpec secret_key;
-    private byte[] key;
-    private byte[] iv;
+    private IvParameterSpec iv;
 
-    public static int iv_length = 16;
-    private static String encrypt_type = "AES";
+    public static int key_length = 16;
+    private static String encrypt_type = "AES/CFB/NoPadding";
     private static String hash_type = "SHA-1";
 
     // Takes plaintext key, prepares it, and generates IV
     public void set_key(String plaintext_key) {
-        MessageDigest sha;
         try {
-            sha = MessageDigest.getInstance(hash_type);     // Initialize hasher
-            key = sha.digest(plaintext_key.getBytes());     // Get hash of key
-            secret_key = new SecretKeySpec(Arrays.copyOf(key, iv_length), encrypt_type);      // Generate secret key
+            MessageDigest hasher = MessageDigest.getInstance(hash_type);
+            byte[] hashed_key = hasher.digest(plaintext_key.getBytes());
+
+            secret_key = new SecretKeySpec(hashed_key, 0, key_length, get_algorithm(encrypt_type));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -39,42 +36,52 @@ public class encrypter {
     }
 
     // Checks whether the instance has a key
-    boolean has_key() {
+    public boolean has_key() {
         return this.secret_key != null;
     }
 
     // Generates an IV for the instance
-    void generate_iv() {
-        SecureRandom generator = new SecureRandom();
+    private void generate_iv() {
+        if (iv != null) return;
 
-        iv = new byte[iv_length];
-        generator.nextBytes(iv);
+        SecureRandom generator = new SecureRandom();
+        byte[] raw_iv = new byte[key_length];
+
+        generator.nextBytes(raw_iv);
+        iv = new IvParameterSpec(raw_iv);
+    }
+
+    // Extracts IV from encoded byte stream
+    private byte[] extract_iv(byte[] raw_data) {
+        byte[] raw_iv = new byte[key_length];
+        byte[] data = new byte[raw_data.length - key_length];
+        split_array(raw_data, raw_iv, data);
+
+        iv = new IvParameterSpec(raw_iv);
+        return data;
     }
 
     // Run encrypt/decrypt operation
-    byte[] run_crypt_operation(int operation_mode, byte[] data)  {
+    private byte[] run_crypt_operation(int operation_mode, byte[] data)  {
+        if (operation_mode == Cipher.DECRYPT_MODE) data = extract_iv(data);
         if (!this.has_key()) set_key();
 
-        if (operation_mode == Cipher.ENCRYPT_MODE)
-            data = data_management.concat_arrays(iv, data);
-        else if(operation_mode == Cipher.DECRYPT_MODE) {
-            byte[] _iv = new byte[iv_length], payload = new byte[data.length - iv_length];
-            data_management.split_array(data, _iv, payload);
-
-            data = payload;
-            iv = _iv;
-        }
-
         Cipher cipher;
+        byte[] output = null;
+
         try {
             cipher = Cipher.getInstance(encrypt_type);
-            cipher.init(operation_mode, this.secret_key);
-            return cipher.doFinal(data);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
-                BadPaddingException | IllegalBlockSizeException e) {
+            cipher.init(operation_mode, secret_key, iv);
+            output = cipher.doFinal(data);
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
-        return null;
+
+        if (output != null && operation_mode != Cipher.DECRYPT_MODE)
+            output = concat_arrays(iv.getIV(), output);
+
+        return output;
     }
 
     // Encrypt data

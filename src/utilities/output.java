@@ -25,6 +25,10 @@ public class output {
         System.out.print('\n');
     }
 
+    public static void print_hex(byte[] array) {
+        print_hex(array, 0, array.length);
+    }
+
 
     public static void write_file(Path file_path, byte[] data) {
         FileOutputStream data_file;

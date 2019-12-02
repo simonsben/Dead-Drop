@@ -4,10 +4,10 @@ import core.technique;
 
 public class basic_encoder extends image_encoder {
     image base_image;
+    static int header_length = 5;
 
     public basic_encoder(String[] filenames, String technique_name) {
         super(filenames, technique_name);
-        this.header_length = 5;
         base_image = this.image_set[0];
     }
 
@@ -17,7 +17,6 @@ public class basic_encoder extends image_encoder {
 
     public basic_encoder(image[] images, technique tech) {
         super(images, tech);
-        header_length = 5;
         base_image = image_set[0];
     }
 
@@ -33,8 +32,8 @@ public class basic_encoder extends image_encoder {
     public void encode_data(byte[] data) {
         has_capacity(data.length);
 
-        int data_length = tech.embed_data(base_image, data, this.header_length);     // Embed data
-        tech.embed_data(base_image, get_header(data_length));                        // Embed header
+        int data_length = tech.embed_data(base_image, data, header_length);     // Embed data
+        tech.embed_data(base_image, get_header(data_length), 0);                        // Embed header
         base_image.was_used = true;
     }
 
@@ -42,6 +41,6 @@ public class basic_encoder extends image_encoder {
         if (base_image.encode_mode == -1)
             throw new IllegalArgumentException("Provided file does not have data encoded in it.");
 
-        return tech.recover_data(base_image, base_image.data_size, this.header_length);   // Recover data
+        return tech.recover_data(base_image, base_image.data_size, header_length);   // Recover data
     }
 }
