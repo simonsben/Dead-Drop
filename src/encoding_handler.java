@@ -1,6 +1,6 @@
 import core.BPCS;
 import core.Naive;
-import core.image;
+import core.Image;
 import core.technique;
 import core.Potential;
 import java.io.File;
@@ -35,7 +35,7 @@ public class encoding_handler {
     void decode_selection(String filename) {
         if (selected == null)
             throw new IllegalCallerException("Can't decode data without a valid selection");
-        image[] selected_images = (image[]) selected.image_set.toArray();
+        Image[] selected_images = (Image[]) selected.image_set.toArray();
         technique tech = selected_images[0].encode_tech == 0? naive : bpcs;
 
         image_encoder encoder;
@@ -75,7 +75,7 @@ public class encoding_handler {
         short index = 0;
 
         for (File filename : candidates) {
-            image img = new image(filename.toString(), naive);
+            Image img = new Image(filename.toString(), naive);
             if (!img.was_used)
                 img.load_image(bpcs);
             if (!img.was_used)

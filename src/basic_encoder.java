@@ -1,9 +1,9 @@
+import core.Image;
 import core.header;
-import core.image;
 import core.technique;
 
 public class basic_encoder extends image_encoder {
-    image base_image;
+    Image base_image;
     static int header_length = 5;
 
     public basic_encoder(String[] filenames, String technique_name) {
@@ -15,7 +15,7 @@ public class basic_encoder extends image_encoder {
         this(filenames, "naive");
     }
 
-    public basic_encoder(image[] images, technique tech) {
+    public basic_encoder(Image[] images, technique tech) {
         super(images, tech);
         base_image = image_set[0];
     }

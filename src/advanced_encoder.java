@@ -1,5 +1,5 @@
 import core.header;
-import core.image;
+import core.Image;
 import core.technique;
 import utilities.encrypter;
 import java.util.Random;
@@ -19,12 +19,12 @@ public class advanced_encoder extends image_encoder {
         this(filenames, "naive");
     }
 
-    public advanced_encoder(image[] images, technique tech, short _encoding_id) {
+    public advanced_encoder(Image[] images, technique tech, short _encoding_id) {
         super(images, tech);
         encoding_id = _encoding_id;
     }
 
-    byte[] get_header(image img, int data_length) {
+    byte[] get_header(Image img, int data_length) {
         img.encode_mode = 1;
         img.data_size = data_length;
         img.encoding_id = this.encoding_id;
@@ -35,7 +35,7 @@ public class advanced_encoder extends image_encoder {
         has_capacity(data.length);
         byte[] data_subset;
         int byte_offset = 0, data_size, max_size;
-        image img;
+        Image img;
 
         for (byte index = 0; index < image_set.length; index++) {
             img = image_set[index];
@@ -60,7 +60,7 @@ public class advanced_encoder extends image_encoder {
     public byte[] decode_data() {
         byte[] data = new byte[0], image_data;
 
-        for (image img : image_set) {
+        for (Image img : image_set) {
             if (img.was_used) {
                 image_data = tech.recover_data(img, img.data_size, header_length);
                 data = concat_arrays(data, image_data);

@@ -15,9 +15,9 @@ public abstract class technique {
         encrypt_manager = new encrypter();
     }
 
-    public abstract void analyze_image(image img);
-    public abstract int embed_data(image img, byte[] data, int offset);
-    public abstract byte[] recover_data(image img, int data_size, int offset);
+    public abstract void analyze_image(Image img);
+    public abstract int embed_data(Image img, byte[] data, int offset);
+    public abstract byte[] recover_data(Image img, int data_size, int offset);
 
 //    public int embed_data(image img, byte[] data) {
 //        return embed_data(img, data, 0);

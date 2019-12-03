@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class image {
+public class Image {
     public BufferedImage image;
     public int data_capacity, data_size, num_channels;
     public short encoding_id;
@@ -15,12 +15,12 @@ public class image {
     public boolean was_used = false;
     public Path filename;
 
-    public image(String filename, technique tech) {
+    public Image(String filename, technique tech) {
         this.filename = Paths.get(filename);
         load_image(tech);
     }
 
-    public image() {}
+    public Image() {}
 
     public void load_image(technique tech) {
         image = input.load_image(this.filename);
@@ -43,6 +43,11 @@ public class image {
         extension = extension == null ? "png" : extension;
 
         save_image(filename, extension);
+    }
+
+    @Override
+    public int hashCode() {
+        return image.hashCode();
     }
 
     // TODO cleanup

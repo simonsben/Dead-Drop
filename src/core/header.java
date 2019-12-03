@@ -11,7 +11,7 @@ public class header {
     static byte signature = (byte) 0xA8;        // Define default signature as 101010XX
     static byte signature_mask = (byte) 0xFC;
 
-    public static void decode_header(image img, technique tech) {
+    public static void decode_header(Image img, technique tech) {
         byte raw = tech.recover_data(img, 1, 0)[0];     // Get first byte
         byte saved_technique = (byte) low_level.extract_bit(raw, 0, 1, 0);
 
@@ -29,7 +29,7 @@ public class header {
     }
 
     // Generate header for encoding mode 1, basic
-    public static byte[] generate_basic(image img, technique tech) {
+    public static byte[] generate_basic(Image img, technique tech) {
         byte[] header = new byte[5];
 
         header[0] = signature;                                          // Add signature and encoding mode (0)
@@ -40,7 +40,7 @@ public class header {
     }
 
     // Decode header when using encoding mode 1, basic
-    public static void decode_basic(image img, technique tech) {
+    public static void decode_basic(Image img, technique tech) {
         img.encode_mode = 0;
 
         // Get data size
@@ -52,7 +52,7 @@ public class header {
     }
 
     // Generate header for encoding mode 1, advanced
-    public static byte[] generate_advanced(image img, technique tech) {
+    public static byte[] generate_advanced(Image img, technique tech) {
         byte[] header = new byte[8];
         header[0] = (byte) (signature | 1);                             // Add signature and encoding mode
         if (tech instanceof BPCS) header[0] = (byte) (header[0] | 2);   // If technique 1, encode in header
@@ -65,7 +65,7 @@ public class header {
     }
 
     // Decode header when using encoding mode 2, advanced
-    public static void decode_advanced(image img, technique tech) {
+    public static void decode_advanced(Image img, technique tech) {
         img.encode_mode = 1;
 
         byte[] raw_header = tech.recover_data(img, 7, 1);

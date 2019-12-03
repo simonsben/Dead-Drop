@@ -6,9 +6,9 @@ public class Potential {
     public int index;
     public short encoding_id;
     public boolean is_advanced;
-    public ArrayList<image> image_set;
+    public ArrayList<Image> image_set;
 
-    public Potential(int _index, boolean _is_advanced, image img, short _encoding_id) {
+    public Potential(int _index, boolean _is_advanced, Image img, short _encoding_id) {
         index = _index;
         is_advanced = _is_advanced;
         encoding_id = _encoding_id;
@@ -16,12 +16,12 @@ public class Potential {
 
         add(img);
     }
-    public Potential(int _index, boolean _is_advanced, image img) {
+    public Potential(int _index, boolean _is_advanced, Image img) {
         this(_index, _is_advanced, img, (short) -1);
     }
 
 
-    public void add(image img) {
+    public void add(Image img) {
         if (!is_advanced && image_set.size() > 0)
             throw new IllegalArgumentException("Cannot add more than one image to basic potential encoding");
         image_set.add(img);
@@ -48,7 +48,7 @@ public class Potential {
         if (is_advanced)
             listing.append(encoding_id);
 
-        for (image img : image_set) {
+        for (Image img : image_set) {
             listing.append(' ');
             listing.append(img.filename.getFileName());
         }

@@ -17,12 +17,12 @@ public class BPCS extends technique {
         }
     }
 
-    public static byte threshold = 15;
+    public static byte threshold = 75;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static Naive naive_encoder = new Naive();
-    public HashMap<image, info_set> image_cache = new HashMap<>();
+    public HashMap<Image, info_set> image_cache = new HashMap<>();
 
-    public void analyze_image(image img) {
+    public void analyze_image(Image img) {
         if (image_cache.containsKey(img)) return;
 
         Raster raster = img.image.getRaster();
@@ -73,7 +73,7 @@ public class BPCS extends technique {
             primary_row = swap;
 
             y_block = y / block_size;                   // Get y block index
-            for (int x=0;x<width-1;x++) {
+             for (int x=0;x<width-1;x++) {
                 x_block = x / block_size;               // Get x block index
                 x_index = x * num_channels + channel;   // Get x index
 
@@ -102,13 +102,13 @@ public class BPCS extends technique {
         return edge_counts;
     }
 
-    public int embed_data(image img, byte[] data, int offset) {
+    public int embed_data(Image img, byte[] data, int offset) {
         if (offset > 1) data = encrypt_manager.encrypt_data(data);  // Don't encrypt if its the header
         if (data.length + offset > img.data_capacity)
             throw new IllegalArgumentException(data.length + "B exceeds image capacity of " + img.data_capacity + "B");
         info_set image_info = image_cache.get(img);                 // Get image info from cache
 
-        image sub_image = new image();
+        Image sub_image = new Image();
         int byte_offset = 0;
         byte[] data_subset = new byte[block_capacity];
         byte[][][][] edge_counts = image_info.edge_counts;
@@ -140,11 +140,11 @@ public class BPCS extends technique {
         return data.length;
     }
 
-    BufferedImage get_sub_image(image img, int x_index, int y_index) {
+    BufferedImage get_sub_image(Image img, int x_index, int y_index) {
         return img.image.getSubimage(x_index * block_size, y_index * block_size, block_size, block_size);
     }
 
-    int insert_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane, int channel) {
+    int insert_data(Image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane, int channel) {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
@@ -155,11 +155,11 @@ public class BPCS extends technique {
         return byte_offset;
     }
 
-    public byte[] recover_data(image img, int data_size, int offset) {
+    public byte[] recover_data(Image img, int data_size, int offset) {
         if (!image_cache.containsKey(img)) analyze_image(img);
         info_set image_info = image_cache.get(img);
 
-        image sub_image = new image();
+        Image sub_image = new Image();
         int byte_offset = 0;
         byte[] data_subset = new byte[block_capacity], data = new byte[data_size];
         byte[][][][] edge_counts = image_info.edge_counts;
@@ -200,7 +200,7 @@ public class BPCS extends technique {
         return data;
     }
 
-    int extract_data(image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane, int channel) {
+    int extract_data(Image sub_image, byte[] data, byte[] data_subset, int image_offset, int byte_offset, int bit_plane, int channel) {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 

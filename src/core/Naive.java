@@ -5,16 +5,16 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 public class Naive extends technique {
-    public void analyze_image(image img) {
+    public void analyze_image(Image img) {
         Raster raster = img.image.getRaster();
         img.data_capacity = raster.getWidth() * raster.getHeight() * img.num_channels / 8;
     }
 
-    public int embed_data(image img, byte[] data, int offset) {
+    public int embed_data(Image img, byte[] data, int offset) {
         return embed_data(img, data, offset, 0, -1);
     }
 
-    public int embed_data(image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
+    public int embed_data(Image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();
 
         int num_channels = image_raster.getNumBands();
@@ -63,16 +63,16 @@ public class Naive extends technique {
         return data.length;
     }
 
-    public byte[] recover_data(image img, int data_size, int offset) {
+    public byte[] recover_data(Image img, int data_size, int offset) {
         byte[] data = new byte[data_size];
         return recover_data(img, data, offset);
     }
 
-    public byte[] recover_data(image img, byte[] data, int offset) {
+    public byte[] recover_data(Image img, byte[] data, int offset) {
         return recover_data(img, data, offset, 0, -1);
     }
 
-    public byte[] recover_data(image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
+    public byte[] recover_data(Image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();            // Get core.image raster
 
         int num_channels = image_raster.getNumBands();              // Get number of channels in core.image

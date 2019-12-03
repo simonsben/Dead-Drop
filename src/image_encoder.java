@@ -1,4 +1,4 @@
-import core.image;
+import core.Image;
 import core.Naive;
 import core.BPCS;
 import core.technique;
@@ -6,7 +6,7 @@ import core.technique;
 import java.security.InvalidParameterException;
 
 public abstract class image_encoder {
-    image[] image_set;
+    Image[] image_set;
     static int header_length;
     int data_capacity;
     technique tech = new Naive();
@@ -16,14 +16,14 @@ public abstract class image_encoder {
     public image_encoder(String[] filenames, String technique_name) {
         set_technique(technique_name);
 
-        image_set = new image[filenames.length];
+        image_set = new Image[filenames.length];
         for (int index=0;index<filenames.length;index++)
-            image_set[index] = new image(filenames[index], tech);
+            image_set[index] = new Image(filenames[index], tech);
 
         analyze_images();
     }
 
-    public image_encoder(image[] images, technique _tech) {
+    public image_encoder(Image[] images, technique _tech) {
         image_set = images;
         tech = _tech;
 
@@ -46,7 +46,7 @@ public abstract class image_encoder {
     }
 
     public void analyze_images() {
-        for (image img : image_set) {
+        for (Image img : image_set) {
             tech.analyze_image(img);
             this.data_capacity += img.data_capacity;
         }
@@ -59,7 +59,7 @@ public abstract class image_encoder {
     }
 
     public void save_images() {
-        for (image target_image : image_set) {
+        for (Image target_image : image_set) {
             if (target_image.was_used)
                 target_image.save_image();
         }
@@ -78,7 +78,7 @@ public abstract class image_encoder {
         StringBuilder output = new StringBuilder();
         output.append("Advanced encoder with images:\n");
 
-        for (image img : image_set) {
+        for (Image img : image_set) {
             output.append(img);
             output.append('\n');
         }
