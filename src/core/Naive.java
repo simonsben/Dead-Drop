@@ -39,7 +39,7 @@ public class Naive extends technique {
                 for (int channel=channel_start;channel<channel_end;channel++) {
                     if (initial_load) {
                         initial_load = false;
-                        channel = (byte_offset * 8) % channel_width;
+                        channel = (target_channel != -1)? target_channel : (byte_offset * 8) % channel_width;
                     }
 
                     target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index, bit_plane);
@@ -97,7 +97,7 @@ public class Naive extends technique {
                 for (int channel = channel_start; channel < channel_end; channel++) {
                     if (initial_load) {
                         initial_load = false;
-                        channel = (target_channel == -1)? (byte_offset * 8) % channel_width : channel_start;
+                        channel = (target_channel != -1)? target_channel : (byte_offset * 8) % channel_width;
                     }
 
                     current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_plane, bit_index);   // Get pixel
