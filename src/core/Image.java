@@ -7,6 +7,10 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static core.header.decode_header;
+import static utilities.strings.get_extension;
+import static utilities.strings.remove_extension;
+
 public class Image {
     // Define class variables
     public Path filename;
@@ -30,7 +34,7 @@ public class Image {
         image = input.load_image(this.filename);
         num_channels = image.getRaster().getNumBands();
 
-        header.decode_header(this, tech);
+        decode_header(this, tech);
     }
 
     // Save image to file
@@ -40,13 +44,13 @@ public class Image {
 
     // Save image to file
     public void save_image() {
-        String raw_filename =  strings.remove_extension(this.filename.getFileName().toString());
+        String raw_filename = remove_extension(this.filename.getFileName().toString());
         save_image("processed/" + raw_filename + ".png");
     }
 
     // Save image to file
     public void save_image(String filename) {
-        String extension = strings.get_extension(filename);
+        String extension = get_extension(filename);
         extension = extension == null ? "png" : extension;
 
         save_image(filename, extension);

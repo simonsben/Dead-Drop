@@ -171,7 +171,7 @@ public class BPCS extends technique {
             throw new IllegalArgumentException(data_size + "B exceeds image capacity of " + image.data_capacity + "B");
 
         int byte_offset = 0;
-        boolean first = true;
+        boolean first = true, payload_operation = offset > 1;
         Image sub_image = new Image();
         Info_set image_info = image_cache.get(image);
         byte[][][][] edge_counts = image_info.edge_counts;
@@ -195,13 +195,13 @@ public class BPCS extends technique {
                             byte_offset = extract_data(sub_image, data, data_subset, 0, byte_offset, plane, channel);
 
                         if (byte_offset >= data.length)
-                            return (offset > 1)? encrypt_manager.decrypt_data(data) : data;
+                            return payload_operation? encrypt_manager.decrypt_data(data) : data;
                     }
                 }
             }
         }
 
-        return (offset > 1)? encrypt_manager.decrypt_data(data) : data;
+        return payload_operation? encrypt_manager.decrypt_data(data) : data;
     }
 
     // Extract data from image block

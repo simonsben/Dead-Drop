@@ -3,8 +3,8 @@ import core.Image;
 import core.technique;
 import utilities.Encrypter;
 import java.util.Random;
-import static utilities.data_management.concat_arrays;
-import static utilities.data_management.get_sub_array;
+
+import static utilities.data_management.*;
 
 public class advanced_encoder extends image_encoder {
     short encoding_id;
@@ -65,7 +65,6 @@ public class advanced_encoder extends image_encoder {
                 data = concat_arrays(data, image_data);
             }
         }
-
         return data;
     }
 }
