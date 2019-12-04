@@ -15,9 +15,9 @@ import static utilities.output.write_file;
 import static utilities.strings.get_extension;
 
 public class encoding_handler {
-    technique naive = new Naive(), bpcs = new BPCS();
-    HashMap<Short, Potential> potentials;
     Potential selected;
+    HashMap<Short, Potential> potentials;
+    technique naive = new Naive(), bpcs = new BPCS();
 
     public static void main(String[] args) {
         encoding_handler handler = new encoding_handler("processed");

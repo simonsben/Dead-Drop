@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class strings {
-    // Get general encryption algorithm
+    // Get general encryption algorithm from full string (i.e. alg/mode/padding -> alg)
     public static String get_algorithm(String full_algorithm) {
         return execute_regex("^\\w+", full_algorithm);
     }
@@ -19,6 +19,14 @@ public class strings {
         return execute_regex("^[\\w\\d-]+(?=\\.)", filename);
     }
 
+    // Executes a regex function
+    public static String execute_regex(String regex_string, String target) {
+        Pattern pattern = Pattern.compile(regex_string);
+        Matcher matcher = pattern.matcher(target);
+
+        return execute_regex(matcher);
+    }
+
     // Executes regex function
     public static String execute_regex(Matcher matcher) {
         boolean did_find = matcher.find();
@@ -26,13 +34,5 @@ public class strings {
             return null;
 
         return matcher.group(0);
-    }
-
-    // Executes a regex function
-    public static String execute_regex(String regex_string, String target) {
-        Pattern pattern = Pattern.compile(regex_string);
-        Matcher matcher = pattern.matcher(target);
-
-        return execute_regex(matcher);
     }
 }

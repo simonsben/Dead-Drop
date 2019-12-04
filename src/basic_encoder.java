@@ -33,7 +33,7 @@ public class basic_encoder extends image_encoder {
         has_capacity(data.length);
 
         int data_length = tech.embed_data(base_image, data, header_length);     // Embed data
-        tech.embed_data(base_image, get_header(data_length), 0);                        // Embed header
+        tech.embed_data(base_image, get_header(data_length));                        // Embed header
         base_image.was_used = true;
     }
 

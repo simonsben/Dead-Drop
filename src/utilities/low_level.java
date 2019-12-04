@@ -19,6 +19,7 @@ public class low_level {
         return insert_bit(source, target, index, 0);
     }
 
+    // Inserts bit from given index of source into specified index in target
     public static int insert_bit(int source, int target, int source_index, int target_index) {
         int source_bit = get_bit(source, source_index), offset = target_index - source_index;
         source_bit = (offset < 0)? source_bit >> -offset : source_bit << offset;
@@ -31,11 +32,11 @@ public class low_level {
         return extract_bit(source, target, 0, index);
     }
 
+    // Extracts the bit from the given index of the source and inserts into the specified index of the target
     public static int extract_bit(int source, int target, int source_index, int target_index) {
         int offset = target_index - source_index, source_bit = get_bit(source, source_index);
-        int prepared_source = (offset < 0)? source_bit >> -offset : source_bit << offset;
+        source_bit = (offset < 0)? source_bit >> -offset : source_bit << offset;
 
-        return prepared_source | target;
+        return source_bit | target;
     }
-
 }

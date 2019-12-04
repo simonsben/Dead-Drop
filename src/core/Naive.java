@@ -4,22 +4,28 @@ import utilities.low_level;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
+import static utilities.low_level.extract_bit;
+import static utilities.low_level.insert_bit;
+
 public class Naive extends technique {
+    // Analyze image in preparation for future operations
     public void analyze_image(Image img) {
         Raster raster = img.image.getRaster();
         img.data_capacity = raster.getWidth() * raster.getHeight() * img.num_channels / 8;
     }
 
+    // Embed data into image
     public int embed_data(Image img, byte[] data, int offset) {
         return embed_data(img, data, offset, 0, -1);
     }
 
+    // Embed data into image
     public int embed_data(Image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();
 
         int num_channels = image_raster.getNumBands();
-        int height = image_raster.getHeight(), width = image_raster.getWidth();
         int byte_index = 0, bit_index = 0, source = data[0];
+        int height = image_raster.getHeight(), width = image_raster.getWidth();
         int channel_start = (target_channel == -1)? 0 : target_channel,
                 channel_end = (target_channel == -1)? num_channels : target_channel + 1,
                 channel_width = channel_end - channel_start;
@@ -42,19 +48,18 @@ public class Naive extends technique {
                         channel = (target_channel != -1)? target_channel : (byte_offset * 8) % channel_width;
                     }
 
-                    target_image[channel] = low_level.insert_bit(source, target_image[channel], bit_index, bit_plane);
+                    target_image[channel] = insert_bit(source, target_image[channel], bit_index, bit_plane);
 
                     bit_index++;
                     if (bit_index > 7) {
-                        bit_index = 0;  // Reset bit index
+                        bit_index = 0;                              // Reset bit index
 
-                        byte_index++;                       // Increment byte index
-                        if (byte_index >= data.length) {    // If no more data, stop
+                        byte_index++;                               // Increment byte index
+                        if (byte_index >= data.length) {            // If no more data, stop
                             image_raster.setPixel(x, y, target_image);      // Set pixel value before stopping
                             return data.length;
                         }
-
-                        source = data[byte_index];      // Get next byte to embed
+                        source = data[byte_index];                  // Get next byte to embed
                     }
                 }
                 image_raster.setPixel(x, y, target_image);          // Set pixel value
@@ -63,15 +68,18 @@ public class Naive extends technique {
         return data.length;
     }
 
+    // Recover data from image
     public byte[] recover_data(Image img, int data_size, int offset) {
         byte[] data = new byte[data_size];
         return recover_data(img, data, offset);
     }
 
+    // Recover data from image
     public byte[] recover_data(Image img, byte[] data, int offset) {
         return recover_data(img, data, offset, 0, -1);
     }
 
+    // Recover data from image
     public byte[] recover_data(Image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();            // Get core.image raster
 
@@ -99,18 +107,17 @@ public class Naive extends technique {
                         initial_load = false;
                         channel = (target_channel != -1)? target_channel : (byte_offset * 8) % channel_width;
                     }
+                    current_byte = extract_bit(target_pixel[channel], current_byte, bit_plane, bit_index);
 
-                    current_byte = low_level.extract_bit(target_pixel[channel], current_byte, bit_plane, bit_index);   // Get pixel
+                    bit_index++;                                    // Increment bit index
+                    if (bit_index > 7) {                            // If end of byte
+                        bit_index = 0;                              // Reset bit index
 
-                    bit_index++;    // Increment bit index
-                    if (bit_index > 7) {    // If end of byte
-                        bit_index = 0;      // Reset bit index
-
-                        data[byte_index] = (byte) current_byte;    // Add current byte to extracted data array
+                        data[byte_index] = (byte) current_byte;     // Add current byte to extracted data array
                         current_byte = 0;                           // Reset current byte value
 
-                        byte_index++;                   // Increment byte index
-                        if (byte_index >= data.length)  // If no more data, stop
+                        byte_index++;                               // Increment byte index
+                        if (byte_index >= data.length)              // If no more data, stop
                             return data;
                     }
                 }

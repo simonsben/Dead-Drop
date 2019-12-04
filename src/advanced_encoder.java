@@ -1,14 +1,13 @@
 import core.header;
 import core.Image;
 import core.technique;
-import utilities.encrypter;
+import utilities.Encrypter;
 import java.util.Random;
 import static utilities.data_management.concat_arrays;
 import static utilities.data_management.get_sub_array;
 
 public class advanced_encoder extends image_encoder {
     short encoding_id;
-    static int header_length = 8;
 
     public advanced_encoder(String[] filenames, String technique_name) {
         super(filenames, technique_name);
@@ -41,7 +40,7 @@ public class advanced_encoder extends image_encoder {
             img = image_set[index];
 
 
-            max_size = img.data_capacity - header_length - (will_encrypt? encrypter.key_length : 0);
+            max_size = img.data_capacity - header_length - (will_encrypt? Encrypter.key_length : 0);
             data_size = Math.min(max_size, data.length - byte_offset);
 
             data_subset = get_sub_array(data, byte_offset, data_size);          // Get data subset
@@ -53,7 +52,7 @@ public class advanced_encoder extends image_encoder {
             img.image_index = index;
             img.was_used = true;                                                    // Mark image as used
             int data_length = tech.embed_data(img, data_subset, header_length);     // Embed data
-            tech.embed_data(img, get_header(img, data_length), 0);                     // Embed header
+            tech.embed_data(img, get_header(img, data_length));                     // Embed header
         }
     }
 

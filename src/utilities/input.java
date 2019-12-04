@@ -13,42 +13,36 @@ import java.util.Scanner;
 
 public class input {
     private static Scanner input_scanner;
+
     // Import file as byte stream
     public static byte[] load_file(Path file_path) {
-        FileInputStream data_stream = null;
-        byte[] byte_array = null;
+        FileInputStream data_stream;
+        byte[] byte_array;
 
         try {
             File data_file = new File(file_path.toString());    // Initialize file
-            if (!data_file.exists()) {                          // Check if file exists
+            if (!data_file.exists())                            // Check if file exists
                 throw new FileNotFoundException("Given path does not exist.");
-            }
 
             byte_array = new byte[(int) data_file.length()];    // Initialize byte array
-
             data_stream = new FileInputStream(data_file);       // Initialize data stream
             data_stream.read(byte_array);                       // Load file into byte array
-        } catch (IOException e) {   // Catch IO errors
+
+        } catch (IOException e) {                               // Catch IO errors
             e.printStackTrace();
-        } finally {
-            // If byte stream was opened, try to close it
-            if (data_stream != null) {
-                try {
-                    data_stream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            return null;
         }
 
         return byte_array;
     }
 
+    // Load file
     public static byte[] load_file(String filename) {
         Path file_path = Paths.get(filename);
         return load_file(file_path);
     }
 
+    // Load image
     public static BufferedImage load_image(String filename) {
         BufferedImage image;
         try {
@@ -60,10 +54,12 @@ public class input {
         return image;
     }
 
+    // Load image
     public static BufferedImage load_image(Path file_path) {
         return load_image(file_path.toString());
     }
 
+    // Get user input (numeric short)
     public static short get_input() {
         if (input_scanner == null)
             input_scanner = new Scanner(System.in);

@@ -4,20 +4,19 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
-
 import static utilities.data_management.concat_arrays;
 import static utilities.data_management.split_array;
 import static utilities.strings.get_algorithm;
 
-public class encrypter {
-    private SecretKeySpec secret_key;
+public class Encrypter {
     private IvParameterSpec iv;
+    private SecretKeySpec secret_key;
 
     public static int key_length = 16;
-    private static String encrypt_type = "AES/CFB/NoPadding";
     private static String hash_type = "SHA-1";
+    private static String encrypt_type = "AES/CFB/NoPadding";
 
-    // Takes plaintext key, prepares it, and generates IV
+    // Takes plaintext key, hashes it, and generates IV
     public void set_key(String plaintext_key) {
         try {
             MessageDigest hasher = MessageDigest.getInstance(hash_type);
@@ -30,34 +29,36 @@ public class encrypter {
         generate_iv();
     }
 
+    // Allow default key to be used
     public void set_key() {
         System.out.println("----- WARNING: Default key being used for encryption -----");
-        set_key("123456");
+        set_key("default_password");
     }
 
     // Checks whether the instance has a key
     public boolean has_key() {
-        return this.secret_key != null;
+        return secret_key != null;
     }
 
     // Generates an IV for the instance
     private void generate_iv() {
         if (iv != null) return;
 
-        SecureRandom generator = new SecureRandom();
-        byte[] raw_iv = new byte[key_length];
+        SecureRandom generator = new SecureRandom();    // Initialize secure generator
+        byte[] raw_iv = new byte[key_length];           // Allocate iv array
 
-        generator.nextBytes(raw_iv);
-        iv = new IvParameterSpec(raw_iv);
+        generator.nextBytes(raw_iv);                    // Generate iv
+        iv = new IvParameterSpec(raw_iv);               // Store iv
     }
 
-    // Extracts IV from encoded byte stream
+    // Extracts iv from payload
     private byte[] extract_iv(byte[] raw_data) {
         byte[] raw_iv = new byte[key_length];
         byte[] data = new byte[raw_data.length - key_length];
-        split_array(raw_data, raw_iv, data);
 
-        iv = new IvParameterSpec(raw_iv);
+        split_array(raw_data, raw_iv, data);    // Split iv and payload
+        iv = new IvParameterSpec(raw_iv);       // Store iv
+
         return data;
     }
 
@@ -67,20 +68,20 @@ public class encrypter {
         if (!this.has_key()) set_key();
 
         Cipher cipher;
-        byte[] output = null;
+        byte[] output;
 
         try {
             cipher = Cipher.getInstance(encrypt_type);
             cipher.init(operation_mode, secret_key, iv);
             output = cipher.doFinal(data);
-
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | BadPaddingException |
+                IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
+            return null;
         }
 
-        if (output != null && operation_mode != Cipher.DECRYPT_MODE)
-            output = concat_arrays(iv.getIV(), output);
-
+        // If encrypting, add iv to front of payload
+        if (operation_mode == Cipher.ENCRYPT_MODE) output = concat_arrays(iv.getIV(), output);
         return output;
     }
 

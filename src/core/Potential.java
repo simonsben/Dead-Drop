@@ -16,10 +16,10 @@ public class Potential {
 
         add(img);
     }
+
     public Potential(int _index, boolean _is_advanced, Image img) {
         this(_index, _is_advanced, img, (short) -1);
     }
-
 
     public void add(Image img) {
         if (!is_advanced && image_set.size() > 0)
@@ -37,9 +37,6 @@ public class Potential {
 
     @Override
     public String toString() {
-//        if (!is_advanced)
-//            return index + " " + image_set.get(0).filename.getFileName().toString();
-
         StringBuilder listing = new StringBuilder();
         listing.append(index);
         listing.append(": ");

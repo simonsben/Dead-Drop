@@ -25,38 +25,38 @@ public class data_management {
     }
 
     public static void offload_differences(byte[][][] counts, int x, int y, int difference) {
-        for (int bit=0;bit<max_plane;bit++) {
-            if (counts[bit][x][y] < Byte.MAX_VALUE)
-                counts[bit][x][y] += low_level.get_bit(difference, bit) > 0? 1 : 0;
+        for (int plane = 0; plane < max_plane; plane++) {
+            if (counts[plane][x][y] < Byte.MAX_VALUE)
+                counts[plane][x][y] += low_level.get_bit(difference, plane) > 0? 1 : 0;
         }
     }
 
     public static byte[] get_sub_array(byte[] array, int start, int length) {
         byte[] sub_array = new byte[length];
-
-        for (int index = start; index < start + length; index++)
-            sub_array[index - start] = array[index];
+        System.arraycopy(array, start, sub_array, 0, length);
 
         return sub_array;
     }
 
-    // TODO cleanup code - from SO answer
+    // Compute MD5 hash of byte array
     public static String compute_md5(byte[] data) {
-        MessageDigest md = null;
+        MessageDigest md;
         try {
-            md = MessageDigest.getInstance("MD5");
+            md = MessageDigest.getInstance("MD5");                  // Initialize MD5 hash
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return null;
         }
-        byte[] messageDigest = md.digest(data);
 
-        BigInteger no = new BigInteger(1, messageDigest);
-        String hashtext = no.toString(16);
+        byte[] messageDigest = md.digest(data);                     // Hash content
+        BigInteger no = new BigInteger(1, messageDigest);   // Convert to numeric value
+        StringBuilder hashtext = new StringBuilder();               // Initialize string builder
+        hashtext.append(no.toString(16));                     // Convert numeric to hex value
 
-        while (hashtext.length() < 32) {
-            hashtext = "0" + hashtext;
-        }
-        return hashtext;
+        while (hashtext.length() < 32)                              // Add zeros if length is inadequate
+            hashtext.insert(0, "0");
+
+        return hashtext.toString();                                 // Convert string builder to string
     }
 
     public static byte[] get_array(short value) {
