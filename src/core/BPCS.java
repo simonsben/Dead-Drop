@@ -17,7 +17,8 @@ public class BPCS extends technique {
         }
     }
 
-    public static byte threshold = 75;
+    public static byte threshold = 40;
+    public static byte max_plane = 4;
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     private static Naive naive_encoder = new Naive();
     public HashMap<Image, info_set> image_cache = new HashMap<>();

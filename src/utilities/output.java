@@ -54,8 +54,8 @@ public class output {
     }
 
     public static void read_out(byte[] data) {
-//        if (data.length > 250)
-//            throw new IllegalArgumentException("Provided data is too long.");
+        if (data.length > 250)
+            throw new IllegalArgumentException("Provided data is too long.");
 
         for (byte target : data)
             System.out.print((char) target);

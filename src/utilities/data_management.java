@@ -1,14 +1,10 @@
 package utilities;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import static core.BPCS.max_plane;
 
 public class data_management {
     // Concatenate byte arrays
@@ -29,7 +25,7 @@ public class data_management {
     }
 
     public static void offload_differences(byte[][][] counts, int x, int y, int difference) {
-        for (int bit=0;bit<8;bit++) {
+        for (int bit=0;bit<max_plane;bit++) {
             if (counts[bit][x][y] < Byte.MAX_VALUE)
                 counts[bit][x][y] += low_level.get_bit(difference, bit) > 0? 1 : 0;
         }
