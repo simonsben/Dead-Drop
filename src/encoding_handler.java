@@ -12,10 +12,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import static core.header.decode_header;
-import static utilities.data_management.compute_md5;
 import static utilities.input.get_input;
 import static utilities.input.load_file;
-import static utilities.output.read_out;
 import static utilities.output.write_file;
 import static utilities.strings.get_extension;
 
@@ -25,12 +23,14 @@ public class encoding_handler {
     technique naive = new Naive(), bpcs = new BPCS();
     String source_directory, target_filename, target_directory;
     boolean will_encode, is_basic, is_naive;
+    private String plaintext_key;
     static String manual = "Expected parameters as:\n" +
             "-E/D B/A mode of operations (i.e. encrypt or decode, for encode specify Basic/Advanced)\n" +
             "-T N/B technique (i.e. Naive or BPCS encoding technique)\n" +
             "-s source directory (i.e. location of image files)\n" +
             "-d data file (i.e. path for the data/recovered file)\n" +
-            "-t target directory (if encoding, directory to save images to)\n";
+            "-t target directory (if encoding, directory to save images to)\n" +
+            "-k encryption key, optional";
 
     public static void main(String[] args) {
         encoding_handler handler = new encoding_handler();
@@ -60,6 +60,8 @@ public class encoding_handler {
                 if (args[index + 1].charAt(0) != '-')
                     is_basic = args[index + 1].equals("B");
             }
+            else if (args[index].equals("-k"))
+                plaintext_key = args[index + 1];
         }
 
         if (source_directory == null)
@@ -92,6 +94,11 @@ public class encoding_handler {
         }
     }
 
+    private final void add_key(image_encoder encoder) {
+        encoder.set_encryption_key(plaintext_key);
+        plaintext_key = null;
+    }
+
     void encode_selection(File[] files) {
         String[] filenames = new String[files.length];
         for (int index = 0; index < files.length; index++)
@@ -99,6 +106,8 @@ public class encoding_handler {
 
         String tech = is_basic? "naive" : "bpcs";
         image_encoder encoder = is_basic? new basic_encoder(filenames, tech) : new advanced_encoder(filenames, tech);
+        if (plaintext_key != null)
+            encoder.set_encryption_key(plaintext_key);
 
         byte[] file_data = load_file(target_filename);
         encoder.encode_data(file_data);
@@ -114,6 +123,8 @@ public class encoding_handler {
         image_encoder encoder;
         if (selected.is_advanced) encoder = new advanced_encoder(selected_images, tech, selected.encoding_id);
         else encoder = new basic_encoder(selected_images, tech);
+        if (plaintext_key != null)
+            encoder.set_encryption_key(plaintext_key);
 
         byte[] recovered = encoder.decode_data();
         write_file(target_filename, recovered);
