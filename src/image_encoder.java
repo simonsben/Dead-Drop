@@ -5,6 +5,8 @@ import core.technique;
 
 import java.security.InvalidParameterException;
 
+import static utilities.strings.remove_extension;
+
 public abstract class image_encoder {
     Image[] image_set;
     int data_capacity;
@@ -63,11 +65,23 @@ public abstract class image_encoder {
     }
 
     // Save used images
-    public void save_images() {
+    public void save_images(String directory) {
+        String filename;
         for (Image target_image : image_set) {
-            if (target_image.was_used)
-                target_image.save_image();
+            if (target_image.was_used) {
+                if (directory == null)
+                    target_image.save_image();
+                else {
+                    filename = remove_extension(target_image.filename.getFileName().toString());
+                    filename = directory + '/' + filename + ".png";
+                    target_image.save_image(filename);
+                }
+            }
         }
+    }
+
+    public void save_images() {
+        save_images(null);
     }
 
     // Set encryption key for payload

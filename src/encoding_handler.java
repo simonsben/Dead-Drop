@@ -7,11 +7,14 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static core.header.decode_header;
 import static utilities.data_management.compute_md5;
 import static utilities.input.get_input;
+import static utilities.input.load_file;
 import static utilities.output.read_out;
 import static utilities.output.write_file;
 import static utilities.strings.get_extension;
@@ -20,60 +23,97 @@ public class encoding_handler {
     Potential selected;
     HashMap<Short, Potential> potentials;
     technique naive = new Naive(), bpcs = new BPCS();
-    String source_directory, target_filename;
+    String source_directory, target_filename, target_directory;
+    boolean will_encode, is_basic, is_naive;
     static String manual = "Expected parameters as:\n" +
-            "-s source directory (i.e. location of embedded files)\n" +
-            "-f target file (i.e. path for the recovered file)\n";
+            "-E/D B/A mode of operations (i.e. encrypt or decode, for encode specify Basic/Advanced)\n" +
+            "-T N/B technique (i.e. Naive or BPCS encoding technique)\n" +
+            "-s source directory (i.e. location of image files)\n" +
+            "-d data file (i.e. path for the data/recovered file)\n" +
+            "-t target directory (if encoding, directory to save images to)\n";
 
     public static void main(String[] args) {
         encoding_handler handler = new encoding_handler();
         handler.get_params(args);
 
-        handler.select_potential();
-        for (Image image : handler.selected.image_set)
-            System.out.println(image);
-        handler.decode_selection();
+        if (!handler.will_encode) {
+            handler.select_potential();
+            handler.decode_selection();
+        }
     }
 
     void get_params(String[] args) {
         for (int index = 0; index < args.length - 1; index++) {
+            if (args[index].charAt(0) != '-') continue;
             if (args[index].equals("-s"))
                 source_directory = args[index + 1];
-            else if (args[index].equals("-f"))
+            else if (args[index].equals("-d"))
                 target_filename = args[index + 1];
+            else if (args[index].equals("-E") || args[index].equals("-D")) {        // Assumes decode by default
+                will_encode = args[index].equals("-E");
+                if (args[index + 1].charAt(0) != '-')
+                    is_basic = args[index + 1].equals("B");
+            }
+            else if (args[index].equals("-t"))
+                target_directory = args[index + 1];
+            else if (will_encode && args[index].equals("-T")) {
+                if (args[index + 1].charAt(0) != '-')
+                    is_basic = args[index + 1].equals("B");
+            }
         }
 
         if (source_directory == null)
-            throw new IllegalArgumentException("Source directory doesn't exist\n" + manual);
+            throw new IllegalArgumentException("Source directory not provided.\n" + manual);
         if (!(new File(source_directory).exists()))
-            throw new IllegalArgumentException("Source directory doesn't exist\n" + manual);
+            throw new IllegalArgumentException("Source directory doesn't exist.\n" + manual);
         if (target_filename == null)
-            throw new IllegalArgumentException("Target filename must be provided.\n" + manual);
+            throw new IllegalArgumentException("Data filename must be provided.\n" + manual);
+        if (will_encode && !(new File(target_filename)).exists())
+            throw new IllegalArgumentException("Data file does not exist.\n" + manual);
+        if (will_encode && target_directory == null)
+            throw new IllegalArgumentException("Target directory not provided.\n" + manual);
+        if (will_encode && !(new File(target_directory).exists()))
+            throw new IllegalArgumentException("Target directory doesn't exist.\n" + manual);
+
         get_potentials();
     }
 
     void get_potentials() {
         Path dir_path = Paths.get(source_directory);
         File[] files = get_candidates(dir_path);
-        potentials = check_candidates(files);
+
+        if (!will_encode)
+            potentials = check_candidates(files);
+        else {
+            System.out.println("Available images:");
+            for (int index = 0; index < files.length; index++)
+                System.out.printf("%d %s\n", index, files[index].getName());
+            encode_selection(files);
+        }
+    }
+
+    void encode_selection(File[] files) {
+        String[] filenames = new String[files.length];
+        for (int index = 0; index < files.length; index++)
+            filenames[index] = files[index].toString();
+
+        String tech = is_basic? "naive" : "bpcs";
+        image_encoder encoder = is_basic? new basic_encoder(filenames, tech) : new advanced_encoder(filenames, tech);
+
+        byte[] file_data = load_file(target_filename);
+        encoder.encode_data(file_data);
+        encoder.save_images(target_directory);
     }
 
     void decode_selection() {
         if (selected == null)
             throw new IllegalCallerException("Can't decode data without a valid selection");
-//        Image[] selected_images = selected.image_set.toArray(new Image[selected.image_set.size()]);
-//        technique tech = selected_images[0].encode_tech == 0? naive : bpcs;
-//
-        String[] filenames = new String[selected.image_set.size()];
-        for (int index = 0; index < filenames.length; index++)
-            filenames[index] = selected.image_set.get(index).filename.toString();
+        Image[] selected_images = selected.image_set.toArray(new Image[selected.image_set.size()]);
+        technique tech = selected_images[0].encode_tech == 0? naive : bpcs;
 
         image_encoder encoder;
-        if (selected.is_advanced) {
-            encoder = new advanced_encoder(filenames, "bpcs");
-            ((advanced_encoder) encoder).encoding_id = selected.encoding_id;
-        }
-        else encoder = new basic_encoder(filenames, "naive");
+        if (selected.is_advanced) encoder = new advanced_encoder(selected_images, tech, selected.encoding_id);
+        else encoder = new basic_encoder(selected_images, tech);
 
         byte[] recovered = encoder.decode_data();
         write_file(target_filename, recovered);
@@ -123,12 +163,15 @@ public class encoding_handler {
         return potentials;
     }
 
-    final static FilenameFilter filter = ((dir, name) -> get_extension(name).equals("png"));
+    static HashSet<String> source_filetypes = new HashSet<>(Arrays.asList("png", "jpg"));
 
-    public static File[] get_candidates(Path directory) {
+    final static FilenameFilter decode_filter = ((dir, name) -> get_extension(name).equals("png"));
+    final static FilenameFilter encode_filter = ((dir, name) -> source_filetypes.contains(get_extension(name)));
+
+    public File[] get_candidates(Path directory) {
         File dir_file = directory.toFile();
 
-        return dir_file.listFiles(filter);
+        return dir_file.listFiles(will_encode? encode_filter : decode_filter);
     }
 
     @Override

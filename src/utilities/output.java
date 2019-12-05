@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static utilities.strings.remove_extension;
+
 public class output {
     // Print hex output of byte array to console
     public static void print_hex(byte[] array, int start, int end) {
