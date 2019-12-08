@@ -1,7 +1,7 @@
 import core.BPCS;
-import core.Naive;
+import core.LSB;
 import core.Image;
-import core.technique;
+import core.Technique;
 import core.Potential;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -17,10 +17,10 @@ import static utilities.input.load_file;
 import static utilities.output.write_file;
 import static utilities.strings.get_extension;
 
-public class encoding_handler {
+public class Handler {
     Potential selected;
     HashMap<Short, Potential> potentials;
-    technique naive = new Naive(), bpcs = new BPCS();
+    Technique naive = new LSB(), bpcs = new BPCS();
     String source_directory, target_filename, target_directory;
     boolean will_encode, is_basic, is_naive;
     private String plaintext_key;
@@ -33,7 +33,7 @@ public class encoding_handler {
             "-k encryption key, optional";
 
     public static void main(String[] args) {
-        encoding_handler handler = new encoding_handler();
+        Handler handler = new Handler();
         handler.get_params(args);
 
         if (!handler.will_encode) {
@@ -94,7 +94,7 @@ public class encoding_handler {
         }
     }
 
-    private final void add_key(image_encoder encoder) {
+    private final void add_key(Encoder encoder) {
         encoder.set_encryption_key(plaintext_key);
         plaintext_key = null;
     }
@@ -105,7 +105,7 @@ public class encoding_handler {
             filenames[index] = files[index].toString();
 
         String tech = is_basic? "naive" : "bpcs";
-        image_encoder encoder = is_basic? new basic_encoder(filenames, tech) : new advanced_encoder(filenames, tech);
+        Encoder encoder = is_basic? new Basic(filenames, tech) : new Advanced(filenames, tech);
         if (plaintext_key != null)
             encoder.set_encryption_key(plaintext_key);
 
@@ -118,11 +118,11 @@ public class encoding_handler {
         if (selected == null)
             throw new IllegalCallerException("Can't decode data without a valid selection");
         Image[] selected_images = selected.image_set.toArray(new Image[selected.image_set.size()]);
-        technique tech = selected_images[0].encode_tech == 0? naive : bpcs;
+        Technique tech = selected_images[0].encode_tech == 0? naive : bpcs;
 
-        image_encoder encoder;
-        if (selected.is_advanced) encoder = new advanced_encoder(selected_images, tech, selected.encoding_id);
-        else encoder = new basic_encoder(selected_images, tech);
+        Encoder encoder;
+        if (selected.is_advanced) encoder = new Advanced(selected_images, tech, selected.encoding_id);
+        else encoder = new Basic(selected_images, tech);
         if (plaintext_key != null)
             encoder.set_encryption_key(plaintext_key);
 

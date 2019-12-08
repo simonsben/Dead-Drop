@@ -6,7 +6,7 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
 
-public class BPCS extends technique {
+public class BPCS extends Technique {
     // Define set of information about each image
     public static class Info_set {
         public byte[][][][] edge_counts;
@@ -21,7 +21,7 @@ public class BPCS extends technique {
     // Define class variables
     public static byte threshold = 40;
     public static byte max_plane = 4;
-    private static Naive naive_encoder = new Naive();
+    private static LSB LSB_encoder = new LSB();
 
     private int block_size = 8, block_capacity = block_size * block_size / 8;
     public HashMap<Image, Info_set> image_cache = new HashMap<>();
@@ -160,7 +160,7 @@ public class BPCS extends technique {
         System.arraycopy(data, byte_offset, data_subset, 0, data_size);                 // Copy data
         byte_offset += data_size;                                                               // Increment data offset
 
-        naive_encoder.embed_data(sub_image, data_subset, image_offset, bit_plane, channel);     // Encode data
+        LSB_encoder.embed_data(sub_image, data_subset, image_offset, bit_plane, channel);     // Encode data
         return byte_offset;
     }
 
@@ -209,7 +209,7 @@ public class BPCS extends technique {
         int data_size = Math.min(block_capacity - image_offset, data.length - byte_offset);     // Get block data size
         if (data_size != data_subset.length) data_subset = new byte[data_size];                 // [Redefine] array
 
-        naive_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane, channel);
+        LSB_encoder.recover_data(sub_image, data_subset, image_offset, bit_plane, channel);
 
         System.arraycopy(data_subset, 0, data, byte_offset, data_size);                 // Copy data
         byte_offset += data_size;                                                              // Increment data offset

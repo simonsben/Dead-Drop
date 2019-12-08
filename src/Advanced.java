@@ -1,24 +1,24 @@
 import core.header;
 import core.Image;
-import core.technique;
+import core.Technique;
 import utilities.Encrypter;
 import java.util.Random;
 
 import static utilities.data_management.*;
 
-public class advanced_encoder extends image_encoder {
+public class Advanced extends Encoder {
     short encoding_id;
 
-    public advanced_encoder(String[] filenames, String technique_name) {
+    public Advanced(String[] filenames, String technique_name) {
         super(filenames, technique_name);
         encoding_id = (short) (new Random()).nextInt(Short.MAX_VALUE + 1);
     }
 
-    public advanced_encoder(String[] filenames) {
+    public Advanced(String[] filenames) {
         this(filenames, "naive");
     }
 
-    public advanced_encoder(Image[] images, technique tech, short _encoding_id) {
+    public Advanced(Image[] images, Technique tech, short _encoding_id) {
         super(images, tech);
         encoding_id = _encoding_id;
     }

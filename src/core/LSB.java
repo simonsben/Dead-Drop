@@ -1,13 +1,12 @@
 package core;
 
-import utilities.low_level;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 import static utilities.low_level.extract_bit;
 import static utilities.low_level.insert_bit;
 
-public class Naive extends technique {
+public class LSB extends Technique {
     // Analyze image in preparation for future operations
     public void analyze_image(Image img) {
         Raster raster = img.image.getRaster();

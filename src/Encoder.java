@@ -1,21 +1,21 @@
 import core.Image;
-import core.Naive;
+import core.LSB;
 import core.BPCS;
-import core.technique;
+import core.Technique;
 
 import java.security.InvalidParameterException;
 
 import static utilities.strings.remove_extension;
 
-public abstract class image_encoder {
+public abstract class Encoder {
     Image[] image_set;
     int data_capacity;
-    technique tech = new Naive();
+    Technique tech = new LSB();
     static int header_length = 8;
     boolean will_encrypt = false, assigned_key = false;
 
     // Constructor to load images
-    public image_encoder(String[] filenames, String technique_name) {
+    public Encoder(String[] filenames, String technique_name) {
         set_technique(technique_name);
 
         image_set = new Image[filenames.length];
@@ -26,7 +26,7 @@ public abstract class image_encoder {
     }
 
     // Constructor for pre-loaded images
-    public image_encoder(Image[] images, technique _tech) {
+    public Encoder(Image[] images, Technique _tech) {
         image_set = images;
         tech = _tech;
 
@@ -39,7 +39,7 @@ public abstract class image_encoder {
             System.out.println("----- WARNING: Discarding previously set encryption key. -----");
 
         if (technique_name.equals("naive")) {
-            tech = new Naive();
+            tech = new LSB();
             will_encrypt = false;
         } else if (technique_name.equals("bpcs")) {
             tech = new BPCS();

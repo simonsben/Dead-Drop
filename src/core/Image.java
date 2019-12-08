@@ -2,7 +2,7 @@ package core;
 
 import utilities.input;
 import utilities.output;
-import utilities.strings;
+
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,7 +21,7 @@ public class Image {
     public byte image_index, encode_mode = -1, encode_tech = -1;
 
     // Default constructor to load image
-    public Image(String _filename, technique tech) {
+    public Image(String _filename, Technique tech) {
         filename = Paths.get(_filename);
         load_image(tech);
     }
@@ -30,7 +30,7 @@ public class Image {
     public Image() {}
 
     // Load image from file
-    public void load_image(technique tech) {
+    public void load_image(Technique tech) {
         image = input.load_image(this.filename);
         num_channels = image.getRaster().getNumBands();
 
