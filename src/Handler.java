@@ -26,7 +26,7 @@ public class Handler {
     private String plaintext_key;
     static String manual = "Expected parameters as:\n" +
             "-E/D B/A mode of operations (i.e. encrypt or decode, for encode specify Basic/Advanced)\n" +
-            "-T N/B technique (i.e. Naive or BPCS encoding technique)\n" +
+            "-T L/B technique (i.e. LSB or BPCS encoding technique)\n" +
             "-s source directory (i.e. location of image files)\n" +
             "-d data file (i.e. path for the data/recovered file)\n" +
             "-t target directory (if encoding, directory to save images to)\n" +
@@ -42,6 +42,7 @@ public class Handler {
         }
     }
 
+    // TODO modify params to stop the plaintext key from being supplied in the params (since it would appear in the bash history)
     void get_params(String[] args) {
         for (int index = 0; index < args.length - 1; index++) {
             if (args[index].charAt(0) != '-') continue;
@@ -58,7 +59,7 @@ public class Handler {
                 target_directory = args[index + 1];
             else if (will_encode && args[index].equals("-T")) {
                 if (args[index + 1].charAt(0) != '-')
-                    is_basic = args[index + 1].equals("B");
+                    is_naive = args[index + 1].equals("L");
             }
             else if (args[index].equals("-k"))
                 plaintext_key = args[index + 1];
@@ -92,11 +93,6 @@ public class Handler {
                 System.out.printf("%d %s\n", index, files[index].getName());
             encode_selection(files);
         }
-    }
-
-    private final void add_key(Encoder encoder) {
-        encoder.set_encryption_key(plaintext_key);
-        plaintext_key = null;
     }
 
     void encode_selection(File[] files) {
@@ -179,12 +175,15 @@ public class Handler {
     final static FilenameFilter decode_filter = ((dir, name) -> get_extension(name).equals("png"));
     final static FilenameFilter encode_filter = ((dir, name) -> source_filetypes.contains(get_extension(name)));
 
+    // TODO modify to allow user to choose the images when encoding or sort images to use them in order of decreasing capacity
+    // TODO add check to ensure user wants to overwrite previously used images (where applicable)
     public File[] get_candidates(Path directory) {
         File dir_file = directory.toFile();
 
         return dir_file.listFiles(will_encode? encode_filter : decode_filter);
     }
 
+    // TODO sort options by descending index
     @Override
     public String toString() {
         StringBuilder output = new StringBuilder();

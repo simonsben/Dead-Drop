@@ -3,7 +3,7 @@ package core;
 import java.util.ArrayList;
 
 public class Potential {
-    public int index;
+    public int index, data_stored, data_capacity;
     public short encoding_id;
     public boolean is_advanced;
     public ArrayList<Image> image_set;
@@ -27,6 +27,14 @@ public class Potential {
         image_set.add(img);
     }
 
+    public void get_usage() {
+        data_stored = data_capacity = 0;
+        for (Image image : image_set) {
+            data_stored += image.data_size;
+            data_capacity += image.data_capacity;
+        }
+    }
+
     @Override
     public int hashCode() {
         System.out.printf("Computing hash for %d on %s\n", encoding_id, image_set.get(0).filename);
@@ -37,11 +45,20 @@ public class Potential {
 
     @Override
     public String toString() {
+        get_usage();
+
         StringBuilder listing = new StringBuilder();
         listing.append(index);
         listing.append(": ");
         listing.append(is_advanced? "advanced " : "basic ");
-        listing.append(image_set.get(0).encode_tech == 0? "naive " : "bpcs ");
+        listing.append(image_set.get(0).encode_tech == 0? "lsb " : "bpcs ");
+
+        listing.append("Using ");
+        listing.append(data_stored / 1024);
+        listing.append("K of ");
+        listing.append(data_capacity / 1024);
+        listing.append("K ");
+
         if (is_advanced)
             listing.append(encoding_id);
 

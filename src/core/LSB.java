@@ -18,6 +18,7 @@ public class LSB extends Technique {
         return embed_data(img, data, offset, 0, -1);
     }
 
+    // TODO add line to enable LSB to perform encryption
     // Embed data into image
     public int embed_data(Image img, byte[] data, int byte_offset, int bit_plane, int target_channel) {
         WritableRaster image_raster = img.image.getRaster();

@@ -109,6 +109,7 @@ public class BPCS extends Technique {
         return edge_counts;
     }
 
+    // TODO add check to ensure the embedded data has a sufficient number of edges to be recovered
     // Embed data into image
     public int embed_data(Image image, byte[] data, int offset) {
         if (offset > 1) data = encrypt_manager.encrypt_data(data);  // Don't encrypt if its the header

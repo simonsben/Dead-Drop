@@ -59,6 +59,7 @@ public class Advanced extends Encoder {
     public byte[] decode_data() {
         byte[] data = new byte[0], image_data;
 
+        // TODO add sort to ensure that the images are in the order defined by their index
         for (Image img : image_set) {
             if (img.was_used) {
                 image_data = tech.recover_data(img, img.data_size, header_length);

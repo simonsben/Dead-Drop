@@ -3,6 +3,7 @@ out/
 *.iml
 test*
 *.jpg
+*.png
 *.bmp
 data/
 processed/
