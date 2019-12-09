@@ -56,6 +56,10 @@ public class Image {
         save_image(filename, extension);
     }
 
+    public int get_index() {
+        return image_index;
+    }
+
     @Override
     // Define hash as the one associated with the underlying image
     public int hashCode() {

@@ -35,6 +35,10 @@ public class Potential {
         }
     }
 
+    public int get_index() {
+        return index;
+    }
+
     @Override
     public int hashCode() {
         System.out.printf("Computing hash for %d on %s\n", encoding_id, image_set.get(0).filename);

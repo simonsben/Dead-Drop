@@ -2,6 +2,10 @@ import core.header;
 import core.Image;
 import core.Technique;
 import utilities.Encrypter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
 
 import static utilities.data_management.*;
@@ -59,8 +63,12 @@ public class Advanced extends Encoder {
     public byte[] decode_data() {
         byte[] data = new byte[0], image_data;
 
-        // TODO add sort to ensure that the images are in the order defined by their index
-        for (Image img : image_set) {
+        // Before recovering data ensure images are sorted based on their index
+        ArrayList<Image> sorted_images = new ArrayList<>(Arrays.asList(image_set));
+        sorted_images.sort(Comparator.comparingInt(Image::get_index));
+
+        // Recover data from each image
+        for (Image img : sorted_images) {
             if (img.was_used) {
                 image_data = tech.recover_data(img, img.data_size, header_length);
                 data = concat_arrays(data, image_data);

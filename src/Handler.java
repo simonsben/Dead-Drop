@@ -7,9 +7,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static core.header.decode_header;
 import static utilities.input.get_input;
@@ -113,7 +111,7 @@ public class Handler {
     void decode_selection() {
         if (selected == null)
             throw new IllegalCallerException("Can't decode data without a valid selection");
-        Image[] selected_images = selected.image_set.toArray(new Image[selected.image_set.size()]);
+        Image[] selected_images = selected.image_set.toArray(new Image[0]);
         Technique tech = selected_images[0].encode_tech == 0? naive : bpcs;
 
         Encoder encoder;
@@ -170,9 +168,10 @@ public class Handler {
         return potentials;
     }
 
-    static HashSet<String> source_filetypes = new HashSet<>(Arrays.asList("png", "jpg"));
+    static HashSet<String> source_filetypes = new HashSet<>(Arrays.asList("png", "jpg", "bmp"));
+    static HashSet<String> recovery_filetypes = new HashSet<>(Arrays.asList("png", "bmp"));
 
-    final static FilenameFilter decode_filter = ((dir, name) -> get_extension(name).equals("png"));
+    final static FilenameFilter decode_filter = ((dir, name) -> recovery_filetypes.contains(get_extension(name)));
     final static FilenameFilter encode_filter = ((dir, name) -> source_filetypes.contains(get_extension(name)));
 
     // TODO modify to allow user to choose the images when encoding or sort images to use them in order of decreasing capacity
@@ -183,16 +182,19 @@ public class Handler {
         return dir_file.listFiles(will_encode? encode_filter : decode_filter);
     }
 
-    // TODO sort options by descending index
     @Override
     public String toString() {
         StringBuilder output = new StringBuilder();
         output.append("Potential candidates:\n");
 
-        potentials.forEach((key, potential) -> {
+        // Before printing, sort potentials by index
+        ArrayList<Potential> sorted_potentials = new ArrayList<>(potentials.values());
+        sorted_potentials.sort(Comparator.comparingInt(Potential::get_index));
+
+        for (Potential potential : sorted_potentials) {
             output.append(potential);
             output.append('\n');
-        });
+        }
 
         return output.toString();
     }
