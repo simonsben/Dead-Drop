@@ -1,12 +1,12 @@
-# README
+# Dead Drop
 
-Writing software to embed data in one or multiple images
+Dead drop is a program that allows data to be hidden within images using either Least Significant Bit (LSB) or Bit-Plane Complexity Segmentation (BPCS) techniques.
 
-## Stages/features
+## Future features
 
-* Add checkums
-* Quality setting
-    * Increase impact on image quality (ex. enable all of LSB for BPCS or lower threshold)
+* Add checksums
+* Add compression be default
+* Enable public key cipher
 
 ## Format
 
@@ -52,4 +52,4 @@ To decode, also pass the following parameters
 
 ## Environment
 
-Project was developed using Java 13.
+Project was developed using Java 13 with no additional dependencies.
