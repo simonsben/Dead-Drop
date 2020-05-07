@@ -2,8 +2,8 @@
 out/
 *.iml
 test*
-*.jpg
-*.png
-*.bmp
+*/*.jpg
+*/*.png
+*/*.bmp
 data/
 processed/

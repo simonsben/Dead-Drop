@@ -1,4 +1,4 @@
-# Dead Drop
+![](banner.png)
 
 Dead drop is a program that allows data to be hidden within images using either Least Significant Bit (LSB) or Bit-Plane Complexity Segmentation (BPCS) techniques.
 
